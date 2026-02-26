@@ -1,0 +1,86 @@
+
+DỰ TÍNH CHI PHÍ VẬN HÀNH THỰC TẾ: LỊCH SỬ ALL-IN-ONE
+
+Dưới đây là bảng phân tích chi phí dựa trên kiến trúc hiện tại của ứng dụng (React + Firebase + Gemini API + Cloudinary).
+
+I. CÁC KHOẢN CHI PHÍ CỐ ĐỊNH (BẮT BUỘC)
+------------------------------------------------------------------
+1. Tên miền (Domain)
+   - .com / .net: ~250.000đ - 350.000đ / năm.
+   - .vn: ~750.000đ / năm.
+   -> Trung bình tháng: ~30.000đ.
+
+II. CHI PHÍ HẠ TẦNG & DỊCH VỤ (BIẾN ĐỔI THEO LƯỢNG NGƯỜI DÙNG)
+------------------------------------------------------------------
+
+1. Google Firebase (Hosting, Database, Auth)
+   - Gói Spark (Miễn phí):
+     + Hosting: 10GB lưu trữ, 360MB băng thông/ngày.
+     + Firestore: 50.000 lượt đọc/ngày, 20.000 lượt ghi/ngày.
+     + Auth: 50.000 người dùng hoạt động hàng tháng (MAU).
+   - Gói Blaze (Trả theo mức dùng - Pay as you go):
+     + Nếu vượt quá hạn mức miễn phí:
+     + Firestore: $0.06 (1.500đ) / 100.000 lượt đọc.
+     + Hosting: $0.15 (3.800đ) / GB băng thông.
+
+2. Google Gemini API (AI Tutor & Quiz)
+   - Model sử dụng: gemini-2.5-flash (hoặc 1.5-flash).
+   - Gói Miễn phí (Free of Charge):
+     + Giới hạn: 15 yêu cầu/phút (RPM), 1.500 yêu cầu/ngày.
+     + Nhược điểm: Dữ liệu có thể được dùng để train AI, bị giới hạn tốc độ.
+   - Gói Trả phí (Pay-as-you-go):
+     + Giá tham khảo (Flash): ~$0.075 / 1 triệu token đầu vào (Input), ~$0.30 / 1 triệu token đầu ra (Output).
+     + Ưu điểm: Không bị giới hạn 15 RPM, bảo mật dữ liệu.
+
+3. Cloudinary (Lưu trữ Ảnh/Video)
+   - Gói Free: 25 Credits/tháng (~25GB lưu trữ hoặc băng thông).
+   - Gói Plus: $89/tháng (Khoảng 2.2 triệu VNĐ) - Khá đắt nếu chỉ dùng ít.
+   -> Khuyến nghị: Với quy mô học sinh/trường học, gói Free là đủ nếu tối ưu ảnh tốt.
+
+4. Google reCAPTCHA v2
+   - Miễn phí: Tối đa 1 triệu lần kiểm tra/tháng (Quá đủ cho quy mô hiện tại).
+
+III. CÁC KỊCH BẢN VẬN HÀNH & ƯỚC TÍNH TỔNG
+------------------------------------------------------------------
+
+KỊCH BẢN 1: GIAI ĐOẠN PILOT / LỚP HỌC ( < 100 người dùng thường xuyên)
+* Mục tiêu: Demo, chạy thử nghiệm, báo cáo.
+------------------------------------------------
+1. Firebase: 0đ (Gói Spark).
+2. Gemini API: 0đ (Gói Free).
+   *Lưu ý: Nếu cả lớp cùng bấm "Tạo đề thi" một lúc, có thể bị lỗi do giới hạn 15 request/phút.
+3. Cloudinary: 0đ (Gói Free).
+4. Tên miền: Sử dụng subdomain mặc định (.web.app) hoặc mua tên miền rẻ.
+=> TỔNG CHI PHÍ: 0đ - 30.000đ/tháng (nếu mua tên miền).
+
+KỊCH BẢN 2: QUY MÔ TRƯỜNG HỌC ( ~ 1.000 - 2.000 học sinh)
+* Mục tiêu: Vận hành ổn định, AI phản hồi nhanh, không bị chặn.
+------------------------------------------------
+1. Firebase: ~50.000đ - 100.000đ/tháng.
+   - Chủ yếu tốn tiền băng thông Hosting và lượt đọc Firestore (do tải Timeline, Quiz history).
+2. Gemini API: ~200.000đ - 500.000đ/tháng.
+   - Chuyển sang gói trả phí để bỏ giới hạn 15 RPM.
+   - Ước tính: Mỗi học sinh dùng 2000 token/ngày x 1000 HS = 2 triệu token/ngày.
+   - Chi phí AI khá rẻ với model Flash.
+3. Cloudinary: 0đ.
+   - Vẫn dùng gói Free nếu chỉ lưu ảnh thumbnail và avatar. Video nên dùng Youtube Embed (như code hiện tại đang làm) để tiết kiệm.
+=> TỔNG CHI PHÍ: ~300.000đ - 600.000đ/tháng.
+
+KỊCH BẢN 3: QUY MÔ LỚN ( > 10.000 người dùng)
+------------------------------------------------
+1. Firebase: ~500.000đ - 1.000.000đ/tháng (Tối ưu Firestore caching là bắt buộc).
+2. Gemini API: ~2.000.000đ/tháng (Nên cache lại các câu hỏi Quiz phổ biến để giảm gọi API).
+3. Cloudinary: Có thể phải mua gói Plus ($89) hoặc chuyển sang AWS S3 rẻ hơn.
+=> TỔNG CHI PHÍ: > 3.000.000đ/tháng.
+
+IV. KẾT LUẬN & KHUYẾN NGHỊ
+------------------------------------------------------------------
+Để vận hành thực tế cho dự án "Lịch Sử All-In-One" ở mức độ trường học hoặc thi cuộc thi khởi nghiệp:
+
+1. Ngân sách khởi điểm: Nên chuẩn bị khoảng 500.000đ/tháng để nạp vào Google Cloud (Firebase/Gemini) nhằm đảm bảo AI không bị ngắt quãng khi giám khảo chấm thi hoặc nhiều học sinh dùng cùng lúc.
+2. Tối ưu chi phí:
+   - Video: Luôn dùng YouTube Embed (như hiện tại), KHÔNG upload video trực tiếp lên Cloudinary/Firebase Storage để tránh phí băng thông khổng lồ.
+   - Ảnh: Resize ảnh trước khi upload hoặc dùng định dạng WebP (Cloudinary làm tốt việc này).
+   - Database: Hạn chế real-time listener (onSnapshot) ở những trang ít thay đổi, chuyển sang getDocs (đọc 1 lần).
+
+=> Dự án hoàn toàn khả thi để duy trì với chi phí "sinh viên" nếu biết cách cấu hình giới hạn (Budget Alert) trên Google Cloud.

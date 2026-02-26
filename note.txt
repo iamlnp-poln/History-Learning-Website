@@ -1,0 +1,104 @@
+
+# Hướng dẫn Cài đặt & Vận hành
+
+Để ứng dụng hoạt động đầy đủ tính năng (Login Google, Lưu lịch sử, và AI Chat), bạn cần cấu hình các biến môi trường hoặc chỉnh sửa trực tiếp trong file code.
+
+## 1. Firebase (Cho tính năng Đăng nhập & Lưu lịch sử)
+1. Truy cập [Firebase Console](https://console.firebase.google.com/).
+2. Tạo một dự án mới.
+3. Thêm một ứng dụng Web (Web App) vào dự án.
+4. Copy các thông số config (`apiKey`, `authDomain`, `projectId`, etc.).
+5. Vào phần **Authentication** -> **Sign-in method**, bật **Google**.
+6. Vào phần **Firestore Database**, tạo database và thiết lập rules (để test có thể để mode test).
+7. Mở file `firebaseConfig.ts` trong project này và điền các giá trị của bạn vào object `firebaseConfig`.
+
+## 2. Google Gemini API (Cho tính năng AI Tutor)
+1. Truy cập [Google AI Studio](https://aistudio.google.com/).
+2. Tạo một API Key mới.
+3. Nếu chạy dưới local, tạo file `.env.local` và thêm dòng: `VITE_API_KEY=your_key_here`.
+4. Nếu deploy lên Firebase Hosting, bạn cần set biến môi trường hoặc (cách nhanh nhất để test) là dán trực tiếp key vào `services/geminiService.ts` (lưu ý không public code này lên github công khai).
+
+## 3. Google reCAPTCHA (Cho tính năng xác thực đăng nhập)
+Để tắt chế độ "Test Mode" và bảo mật form đăng nhập:
+
+1. Truy cập [Google reCAPTCHA Admin Console](https://www.google.com/recaptcha/admin/create).
+2. Label: Đặt tên ví dụ "SuViet History".
+3. **Quan trọng:** Chọn loại **Challenge (v2)** -> chọn tiếp **"I'm not a robot" Checkbox**.
+4. Domains: Thêm `localhost`, `127.0.0.1` và domain Firebase của bạn.
+5. Submit và copy **Site Key**.
+6. Mở file `components/LoginModal.tsx`, dán key vào biến `RECAPTCHA_SITE_KEY`.
+
+## 4. Cloudinary & Backend (Quan trọng)
+Hệ thống sử dụng **Firebase Functions** (yêu cầu gói Blaze - Pay as you go) để bảo mật key Cloudinary.
+
+**Bước 1: Lấy thông tin**
+1. Đăng ký/Đăng nhập tại [Cloudinary](https://cloudinary.com/).
+2. Vào trang **Dashboard**.
+3. Copy 3 thông số: **Cloud Name**, **API Key**, **API Secret**.
+
+**Bước 2: Cấu hình Backend**
+1. Mở file `functions/index.js`.
+2. Điền đầy đủ 3 thông số trên vào phần `cloudinary.config`.
+
+**Bước 3: Deploy Backend (Sửa lỗi thiếu package)**
+Lỗi `Couldn't find firebase-functions package` xảy ra do chưa cài đặt thư viện cho folder `functions`.
+Bạn có 2 cách để deploy:
+
+*Cách 1 (Khuyên dùng):* Chạy script tự động (từ thư mục gốc):
+```bash
+npm run deploy:backend
+```
+
+*Cách 2 (Thủ công):*
+```bash
+cd functions
+npm install  <-- Quan trọng: Cài đặt thư viện trước
+cd ..
+firebase deploy --only functions
+```
+
+**Bước 4: Cấu hình Frontend**
+1. Mở file `services/cloudinaryService.ts`.
+2. Chỉ cần thay đổi biến `CLOUD_NAME` thành tên cloud của bạn.
+
+## 5. Hướng dẫn Deploy lên Firebase Hosting (Frontend)
+
+Sau khi hoàn thiện ứng dụng, làm theo các bước sau để đưa web lên mạng:
+
+**Bước 1: Cài đặt Firebase CLI (nếu chưa có)**
+Mở terminal và chạy:
+```bash
+npm install -g firebase-tools
+```
+
+**Bước 2: Đăng nhập Firebase**
+```bash
+firebase login
+```
+
+**Bước 3: Khởi tạo dự án (Chỉ làm lần đầu)**
+```bash
+firebase init
+```
+- Chọn **Functions** và **Hosting**.
+- Chọn **Use an existing project** -> Chọn project Firebase bạn đã tạo.
+- **Functions:** Chọn Javascript, No ESLint, Yes install dependencies.
+- **Hosting:** Public directory là `dist`, Rewrite all urls to index.html: Yes.
+
+**Bước 4: Build và Deploy**
+```bash
+npm run build
+firebase deploy --only hosting
+```
+
+Sau khi chạy xong, terminal sẽ hiện ra **Hosting URL**. Đó là link trang web của bạn.
+
+## Troubleshooting (Sửa lỗi thường gặp)
+
+### Lỗi: Runtime Node.js 18 decommissioned
+- Vào `functions/package.json` sửa `"engines": { "node": "18" }` thành `"20"`.
+- Chạy lại lệnh deploy backend.
+
+### Lỗi: auth/unauthorized-domain
+- Vào **Firebase Console** > **Authentication** > **Settings** > **Authorized domains**.
+- Thêm domain trang web của bạn vào danh sách.

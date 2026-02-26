@@ -1,0 +1,29 @@
+
+CÁC ƯU ĐIỂM NỔI BẬT CỦA DỰ ÁN "LỊCH SỬ ALL-IN-ONE" ĐỐI VỚI NGƯỜI DÙNG
+
+1. Tích hợp Kiến thức Toàn diện (All-In-One):
+   - Kết nối song song Lịch sử Việt Nam và Lịch sử Thế giới trên cùng một trục thời gian (Timeline).
+   - Giúp học sinh dễ dàng so sánh, đối chiếu và hiểu rõ mối quan hệ biện chứng giữa các sự kiện trong nước và quốc tế.
+
+2. Công nghệ AI Hỗ trợ Cá nhân hóa:
+   - "AI Tutor" (trợ lý ảo Gemini) giải đáp thắc mắc 24/7, đóng vai giáo viên lịch sử thân thiện.
+   - Tính năng "Phân tích chuyên sâu" giúp hiểu bản chất sự kiện thay vì học vẹt.
+   - Tạo đề thi trắc nghiệm tự động theo chủ đề và ma trận đề thi THPT, giúp ôn luyện không giới hạn.
+
+3. Phương pháp Học tập Trực quan & Tương tác:
+   - Timeline sinh động thay thế văn bản khô khan.
+   - Kho tư liệu số hóa (Video, Hình ảnh, Podcast) phong phú.
+   - Gamification (Hóa thân nhân vật, Bản đồ chiến dịch) biến việc học thành trò chơi thú vị, giảm áp lực.
+
+4. Tiết kiệm & Dễ tiếp cận:
+   - Hoạt động trên nền tảng Web, không cần cài đặt phức tạp.
+   - Tương thích mọi thiết bị (PC, Tablet, Mobile).
+   - Chi phí thấp (mô hình Freemium/Education), phù hợp với học sinh.
+
+5. Nguồn dữ liệu Tin cậy:
+   - Nội dung bám sát chương trình Sách Giáo Khoa (Bộ GD&ĐT).
+   - Có cơ chế kiểm duyệt và báo cáo sai sót để cộng đồng cùng hoàn thiện.
+
+6. Lưu trữ & Theo dõi Tiến độ:
+   - Hệ thống lưu kết quả làm bài, lịch sử ôn tập.
+   - Bảng xếp hạng (Leaderboard) tạo động lực thi đua học tập.

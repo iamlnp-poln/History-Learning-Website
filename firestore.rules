@@ -1,0 +1,85 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- HÀM KIỂM TRA QUYỀN ---
+    
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role;
+    }
+
+    function isSuperAdmin() {
+      return isAuth() && (
+        request.auth.uid == 'x7SvkOuLwQg9buOS9UzX1MFTqlq2' || 
+        request.auth.uid == '4fuhXEkyAZUxF10bmT9Rj6rMkmM2' ||
+        getUserRole() == 'admin'
+      );
+    }
+
+    function isStaff() {
+      return isAuth() && (
+        isSuperAdmin() || getUserRole() == 'advisor'
+      );
+    }
+
+    // --- RULES ---
+
+    match /admins/{userId} {
+      allow read: if isAuth() && (request.auth.uid == userId || isStaff());
+      allow write: if isSuperAdmin(); 
+    }
+
+    // Main Content Data (Public Read, Staff Write)
+    match /historyStages/{stageId} { allow read: if true; allow write: if isStaff(); }
+    match /historicalFigures/{figureId} { allow read: if true; allow write: if isStaff(); }
+
+    match /siteSettings/{docId} { allow read: if true; allow write: if isStaff(); }
+    match /imageOverrides/{imageId} { allow read: if true; allow write: if isStaff(); }
+    match /contentOverrides/{contentId} { allow read: if true; allow write: if isStaff(); }
+    match /videoOverrides/{videoId} { allow read: if true; allow write: if isStaff(); }
+    match /linkOverrides/{linkId} { allow read: if true; allow write: if isStaff(); }
+    match /customEvents/{eventId} { allow read: if true; allow write: if isStaff(); }
+    match /customDocuments/{docId} { allow read: if true; allow write: if isStaff(); }
+    match /customTeamMembers/{docId} { allow read: if true; allow write: if isStaff(); }
+    match /customHeritageItems/{docId} { allow read: if true; allow write: if isStaff(); }
+    match /hiddenItems/{itemId} { allow read: if true; allow write: if isStaff(); }
+    match /articleContent/{articleId} { allow read: if true; allow write: if isStaff(); }
+    match /eventExtensions/{docId} { allow read: if true; allow write: if isStaff(); }
+    
+    // Media Assets Cũ (Giữ lại để tương thích nếu cần)
+    match /media_assets/{docId} {
+      allow read: if true; 
+      allow write: if isStaff();
+    }
+
+    // Media Assets Mới (Google Cloud System)
+    match /media_assets_gcloud/{docId} {
+      allow read: if true; 
+      allow write: if isStaff();
+    }
+
+    match /quizResults/{document=**} {
+      allow read, write: if isAuth();
+    }
+    match /gameProgress/{userId} {
+      allow read, write: if isAuth() && request.auth.uid == userId;
+    }
+    match /quizState/{userId} {
+      allow read, write: if isAuth() && request.auth.uid == userId;
+    }
+    match /figureGame_players/{userId} {
+      allow read: if true;
+      allow write: if isAuth() && (request.auth.uid == userId || userId == 'anon'); 
+    }
+    
+    match /activityLogs/{document=**} {
+      allow create: if isAuth();
+      allow read: if isStaff();
+    }
+  }
+}
