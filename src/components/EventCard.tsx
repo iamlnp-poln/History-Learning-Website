@@ -119,10 +119,10 @@ const EventCard: React.FC<EventCardProps> = ({ event, onAskAI, onViewDetail, onV
                 {/* Ask AI Button */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onAskAI(event); }}
-                    className="text-history-gold hover:text-white hover:bg-history-gold transition-all p-1.5 rounded-full bg-yellow-50 border border-yellow-100"
+                    className="flex items-center gap-1.5 text-history-gold hover:text-white hover:bg-history-gold transition-all px-3 py-1.5 rounded-full bg-yellow-50 border border-yellow-100 shadow-sm text-xs font-bold"
                     title="Hỏi AI về sự kiện này"
                 >
-                    <Bot size={18} />
+                    <Bot size={16} /> Hỏi AI
                 </button>
 
                 {/* NEW: Heritage/Map/Discovery Button */}
@@ -185,8 +185,8 @@ const EventCard: React.FC<EventCardProps> = ({ event, onAskAI, onViewDetail, onV
                           onViewDetail(event);
                       }}
                       className={`
-                        flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider px-4 py-2 rounded-lg transition-all
-                        ${isVN ? 'text-history-red bg-red-50 hover:bg-history-red hover:text-white' : 'text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white'}
+                        flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2.5 rounded-lg transition-all shadow-sm
+                        ${isVN ? 'text-history-red bg-red-50 hover:bg-history-red hover:text-white border border-red-100' : 'text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white border border-blue-100'}
                       `}
                   >
                       <BookOpen size={14} /> Chi tiết <ArrowRight size={14} />

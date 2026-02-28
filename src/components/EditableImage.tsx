@@ -17,6 +17,7 @@ interface EditableImageProps {
   aspectRatio?: string; 
   disableEdit?: boolean;
   enableLightbox?: boolean; 
+  editButtonPosition?: 'left' | 'right';
 }
 
 const EditableImage: React.FC<EditableImageProps> = ({ 
@@ -25,7 +26,8 @@ const EditableImage: React.FC<EditableImageProps> = ({
     className = "", 
     imageId, 
     disableEdit = false,
-    enableLightbox = true 
+    enableLightbox = true,
+    editButtonPosition = 'right'
 }) => {
   const { showToast } = useToast();
   const { openLightbox } = useLightbox(); 
@@ -207,7 +209,7 @@ const EditableImage: React.FC<EditableImageProps> = ({
                     // Init credit input with global credit first, then local override
                     setCreditInput(effectiveCredit); 
                 }}
-                className="absolute top-2 right-2 p-2 bg-white/90 text-gray-700 rounded-full shadow-md opacity-0 group-hover/image:opacity-100 transition-opacity z-10 hover:text-blue-600 pointer-events-auto"
+                className={`absolute top-2 ${editButtonPosition === 'left' ? 'left-2' : 'right-2'} p-2 bg-white/90 text-gray-700 rounded-full shadow-md opacity-0 group-hover/image:opacity-100 transition-opacity z-10 hover:text-blue-600 pointer-events-auto`}
                 title="Sửa hình ảnh"
             >
                 <Edit2 size={16} />

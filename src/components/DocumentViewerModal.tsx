@@ -81,7 +81,17 @@ const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({ doc, onClose 
         <div className="flex-1 bg-gray-100 relative w-full h-full">
             {isLoading && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 z-0">
-                    <Loader2 size={40} className="animate-spin mb-2" />
+                    <svg className="mb-2" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <style>{`
+                        .draw { stroke-dasharray: 100; animation: draw 2s ease-in-out infinite; }
+                        @keyframes draw { 
+                          0% { stroke-dashoffset: 100; } 
+                          50% { stroke-dashoffset: 0; } 
+                          100% { stroke-dashoffset: -100; } 
+                        }
+                      `}</style>
+                      <path className="draw" pathLength="100" d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+                    </svg>
                     <p className="font-medium">Đang tải tài liệu...</p>
                 </div>
             )}

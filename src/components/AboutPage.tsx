@@ -20,6 +20,7 @@ interface TeamMember {
     defaultPhone?: string;
     defaultQuote?: string;
     isCustom?: boolean;
+    category?: 'advisor' | 'lead' | 'companion';
 }
 
 interface Advisor {
@@ -33,10 +34,8 @@ const AboutPage: React.FC = () => {
   const { showToast } = useToast();
   const [isLetterOpen, setIsLetterOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const [selectedAdvisor, setSelectedAdvisor] = useState<Advisor | null>(null);
   
   // Animation States
-  const [isAdvisorClosing, setIsAdvisorClosing] = useState(false);
   const [isMemberClosing, setIsMemberClosing] = useState(false);
   
   // Admin & Data State
@@ -56,93 +55,20 @@ const AboutPage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<TeamMember | null>(null);
 
-  // Danh sách cố vấn (Static List)
-  const advisors: Advisor[] = [
-      { 
-          id: "adv-phuong", 
-          img: "",
-          defaultName: "Cô Đoàn Thụy Kim Phượng",
-          defaultRole: "Giáo viên phụ trách"
-      },
-      { 
-          id: "adv-huong", 
-          img: "",
-          defaultName: "Cô Nguyễn Thị Hương",
-          defaultRole: "Giáo viên Tin Học"
-      },
-      { 
-          id: "adv-hoa", 
-          img: "",
-          defaultName: "Thầy Phạm Văn Hòa",
-          defaultRole: "Giáo viên Tin Học"
-      },
-      { 
-          id: "adv-ngan", 
-          img: "",
-          defaultName: "Cô Nguyễn Thị Kim Ngân",
-          defaultRole: "Giáo viên Lịch Sử"
-      },
-      { 
-          id: "adv-duong", 
-          img: "",
-          defaultName: "Anh Huỳnh Thái Dương",
-          defaultRole: "Cựu Học Sinh"
-      }
-  ];
+  // Add Member Modal State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newMemberData, setNewMemberData] = useState({
+      name: '',
+      role: 'Thành viên',
+      class: 'Lớp...',
+      email: '',
+      phone: '',
+      quote: '',
+      category: 'companion' as 'advisor' | 'lead' | 'companion'
+  });
 
   // Static Team Data (Original 5 members)
-  const staticTeam: TeamMember[] = [
-      { 
-          id: "tm-cat-tuong", 
-          img: "", 
-          defaultName: "Nguyễn Ngọc Cát Tường", 
-          defaultRole: "Co-Founder",
-          defaultClass: "Lớp 12E18",
-          defaultEmail: "ctuong0306@gmail.com",
-          defaultPhone: "0931 204 977",
-          defaultQuote: "I haven't lost my virginity because I never lose."
-      },
-      { 
-          id: "tm-cong-thanh", 
-          img: "", 
-          defaultName: "Đặng Công Thành", 
-          defaultRole: "Co-Founder",
-          defaultClass: "Lớp 12E18",
-          defaultEmail: "dcthanh0803@gmail.com",
-          defaultPhone: "0936 677 083",
-          defaultQuote: "nóng tính đấy, nhưng luôn cháy hết mình"
-      },
-      { 
-          id: "tm-thanh-truc", 
-          img: "", 
-          defaultName: "Nguyễn Đoàn Thanh Trúc", 
-          defaultRole: "Core Member",
-          defaultClass: "Lớp 12D15",
-          defaultEmail: "thanhtruc101108@gmail.com",
-          defaultPhone: "0383 338 262",
-          defaultQuote: "Kẻ chiến thắng không bao giờ bỏ cuộc, kẻ bỏ cuộc không bao giờ chiến thắng."
-      },
-      { 
-          id: "tm-bao-ngoc", 
-          img: "", 
-          defaultName: "Bùi Bảo Ngọc", 
-          defaultRole: "Core Member",
-          defaultClass: "Lớp 11A2",
-          defaultEmail: "ngoc.3phai@gmail.com",
-          defaultPhone: "0931 810 825",
-          defaultQuote: "Sáng tạo không giới hạn, bản lĩnh không lùi bước."
-      },
-      { 
-          id: "tm-nhat-phong", 
-          img: "", 
-          defaultName: "Lại Nhất Phong", 
-          defaultRole: "Core Member",
-          defaultClass: "Lớp 12A8",
-          defaultEmail: "waytothefuture07@gmail.com",
-          defaultPhone: "0772 998 715",
-          defaultQuote: "Đơn vị nhỏ nhất của nỗ lực là một hơi thở. Hãy luôn bắt đầu từ những thứ nhỏ nhất."
-      }
-  ];
+  const staticTeam: TeamMember[] = [];
 
   // Default Technologies (Fallback)
   const DEFAULT_TECHNOLOGIES = [
@@ -236,21 +162,43 @@ const AboutPage: React.FC = () => {
       return () => unsub();
   }, [selectedMember]);
 
-  const handleAddMember = async () => {
+  const handleAddMember = (category: 'advisor' | 'lead' | 'companion') => {
+      setNewMemberData({
+          name: '',
+          role: category === 'advisor' ? 'Cố vấn' : category === 'lead' ? 'Chủ trì' : 'Thành viên',
+          class: 'Lớp...',
+          email: '',
+          phone: '',
+          quote: '',
+          category: category
+      });
+      setIsAddModalOpen(true);
+  };
+
+  const submitAddMember = async () => {
       if(!db) return;
-      const newName = prompt("Nhập tên thành viên mới:");
-      if(!newName) return;
+      if(!newMemberData.name.trim()) {
+          showToast("Vui lòng nhập tên thành viên", "error");
+          return;
+      }
 
       try {
           await addDoc(collection(db, 'customTeamMembers'), {
-              defaultName: newName,
-              defaultRole: "Thành viên",
-              defaultClass: "Lớp...",
+              defaultName: newMemberData.name,
+              defaultRole: newMemberData.role,
+              defaultClass: newMemberData.class,
+              defaultEmail: newMemberData.email,
+              defaultPhone: newMemberData.phone,
+              defaultQuote: newMemberData.quote,
+              category: newMemberData.category,
               img: "",
               createdAt: new Date()
           });
           showToast("Thêm thành viên thành công!", "success");
-      } catch(e: any) { showToast("Lỗi thêm thành viên: " + e.message, "error"); }
+          setIsAddModalOpen(false);
+      } catch(e: any) { 
+          showToast("Lỗi thêm thành viên: " + e.message, "error"); 
+      }
   };
 
   const confirmDelete = (e: React.MouseEvent, member: TeamMember) => {
@@ -294,14 +242,6 @@ const AboutPage: React.FC = () => {
       } catch(e: any) { showToast("Lỗi lưu link: " + e.message, "error"); }
   };
 
-  const handleCloseAdvisor = () => {
-      setIsAdvisorClosing(true);
-      setTimeout(() => {
-          setSelectedAdvisor(null);
-          setIsAdvisorClosing(false);
-      }, 300);
-  };
-
   const handleCloseMember = () => {
       setIsMemberClosing(true);
       setTimeout(() => {
@@ -323,10 +263,63 @@ const AboutPage: React.FC = () => {
   };
 
   // Combine and Filter Team
-  const visibleTeam = [...staticTeam, ...customMembers].filter(m => !hiddenMemberIds.includes(m.id));
+  const visibleTeam = [...staticTeam, ...customMembers]
+    .filter(m => !hiddenMemberIds.includes(m.id))
+    .sort((a, b) => {
+        const dateA = (a as any).createdAt?.seconds || 0;
+        const dateB = (b as any).createdAt?.seconds || 0;
+        return dateA - dateB;
+    });
+
+  const advisorTeam = visibleTeam.filter(m => m.category === 'advisor');
+  const leadTeam = visibleTeam.filter(m => m.category === 'lead');
+  const companionTeam = visibleTeam.filter(m => m.category === 'companion' || !m.category);
 
   // Determine logos to display: Fetched or Default
   const displayLogos = techLogos.length > 0 ? techLogos : DEFAULT_TECHNOLOGIES;
+
+  const renderMemberCard = (mem: TeamMember, idx: number) => {
+      const style = getMemberStyle(idx);
+      return (
+          <div 
+              key={mem.id} 
+              onClick={() => setSelectedMember(mem)}
+              className={`bg-white p-6 rounded-xl shadow-sm border-t-4 ${style.border} hover:shadow-lg transition-all text-center group cursor-pointer h-full flex flex-col relative`}
+          >
+              {/* Delete Button (Admin Only) */}
+              {isAdmin && (
+                  <button 
+                      onClick={(e) => confirmDelete(e, mem)}
+                      className="absolute top-2 right-2 p-1.5 bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 rounded-full transition-colors z-20"
+                  >
+                      <Trash2 size={14} />
+                  </button>
+              )}
+
+              <div className={`w-[80%] aspect-[3/4] mx-auto mb-4 rounded-xl overflow-hidden border border-gray-200 ${style.bg} relative shadow-inner transition-transform duration-300`}>
+                  <EditableImage 
+                      imageId={`team-img-${mem.id}`}
+                      initialSrc={mem.img}
+                      alt="Thành viên"
+                      className="w-full h-full"
+                      disableEdit={true} 
+                      enableLightbox={false}
+                  />
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      <span className="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full">Xem chi tiết</span>
+                  </div>
+              </div>
+              <h3 className={`font-bold text-lg ${style.text} whitespace-normal leading-tight mb-1`}>
+                  <EditableText id={`team-name-${mem.id}`} defaultText={mem.defaultName} />
+              </h3>
+              <div className="mt-auto">
+                  <div className={`inline-block text-xs font-bold uppercase tracking-wide ${style.badge} py-1 px-2 rounded-full`}>
+                      <EditableText id={`team-role-${mem.id}`} defaultText={mem.defaultRole} />
+                  </div>
+              </div>
+          </div>
+      );
+  };
 
   return (
     <div className="animate-fade-in pb-20 bg-gray-50 min-h-screen">
@@ -350,7 +343,7 @@ const AboutPage: React.FC = () => {
             <EditableText id="about-hero-title" defaultText="Về Chúng Tôi" tag="span" />
             </h1>
             <div className="text-gray-300 mt-2 max-w-2xl mx-auto">
-            <EditableText id="about-hero-desc" defaultText="Câu chuyện về đội ngũ xây dựng dự án Lịch Sử All-In-One." tag="p" />
+            <EditableText id="about-hero-desc" defaultText="Câu chuyện về đội ngũ xây dựng dự án Trạm Lịch Sử 4.0." tag="p" />
             </div>
         </div>
       </div>
@@ -368,7 +361,7 @@ const AboutPage: React.FC = () => {
                         id="about-mission-p1"
                         tag="p"
                         multiline
-                        defaultText={`"Lịch Sử All-In-One" là dự án ý tưởng khởi nghiệp (Startup Idea) đang trong quá trình chạy thử nghiệm (Pilot Run), được sáng lập bởi nhóm Tường Thành Vững Chắc (THPT Nguyễn Công Trứ).`}
+                        defaultText={`"Trạm Lịch Sử 4.0" là dự án giải pháp ứng dụng công nghệ và AI đang trong quá trình chạy thử nghiệm (Pilot Run), được sáng lập bởi nhóm The Black Swans.`}
                         className="text-gray-700 leading-relaxed text-lg mb-4"
                     />
                     <EditableText 
@@ -401,176 +394,91 @@ const AboutPage: React.FC = () => {
             </div>
         </div>
 
-        {/* Advisors Section */}
-        <div id="about-advisors">
+        {/* Project Leads Section */}
+        <div id="about-leads" className="mb-16">
             <div className="flex justify-between items-center mb-6 border-l-4 border-history-gold pl-4">
+                <h2 className="text-2xl font-bold font-serif text-history-dark">
+                    <EditableText id="about-leads-title" defaultText="Chủ Trì Dự Án" />
+                </h2>
+            </div>
+            
+            <div className="flex flex-wrap justify-center gap-6">
+                {leadTeam.map((mem, idx) => (
+                    <div key={mem.id} className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-1.5rem)] xl:w-[calc(20%-1.5rem)] max-w-[280px]">
+                        {renderMemberCard(mem, idx)}
+                    </div>
+                ))}
+
+                {/* Add Lead Button */}
+                {isAdmin && (
+                    <div className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-1.5rem)] xl:w-[calc(20%-1.5rem)] max-w-[280px]">
+                        <button 
+                            onClick={() => handleAddMember('lead')}
+                            className="w-full bg-gray-50 border-2 border-dashed border-gray-300 p-6 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:text-history-gold hover:border-history-gold hover:bg-yellow-50 transition-all min-h-[300px] h-full"
+                        >
+                            <Plus size={40} />
+                            <span className="font-bold mt-2">Thêm chủ trì</span>
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+
+        {/* Companion Team Section */}
+        <div id="about-team" className="mb-16">
+            <div className="flex justify-between items-center mb-6 border-l-4 border-history-red pl-4">
+                <h2 className="text-2xl font-bold font-serif text-history-dark">
+                    <EditableText id="about-team-title" defaultText="Đội Ngũ Đồng Hành" />
+                </h2>
+            </div>
+            <div className="flex flex-wrap justify-center gap-6">
+                {companionTeam.map((mem, idx) => (
+                    <div key={mem.id} className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-1.5rem)] xl:w-[calc(20%-1.5rem)] max-w-[280px]">
+                        {renderMemberCard(mem, idx)}
+                    </div>
+                ))}
+
+                {/* Add Companion Button */}
+                {isAdmin && (
+                    <div className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-1.5rem)] xl:w-[calc(20%-1.5rem)] max-w-[280px]">
+                        <button 
+                            onClick={() => handleAddMember('companion')}
+                            className="w-full bg-gray-50 border-2 border-dashed border-gray-300 p-6 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:text-history-red hover:border-history-red hover:bg-red-50 transition-all min-h-[300px] h-full"
+                        >
+                            <Plus size={40} />
+                            <span className="font-bold mt-2">Thêm thành viên</span>
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+
+        {/* Advisors Section */}
+        <div id="about-advisors" className="mb-16">
+            <div className="flex justify-between items-center mb-6 border-l-4 border-blue-600 pl-4">
                 <h2 className="text-2xl font-bold font-serif text-history-dark">
                     <EditableText id="about-advisor-title" defaultText="Ban Cố Vấn Dự Án" />
                 </h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                {advisors.map((adv, idx) => (
-                    <div 
-                        key={adv.id} 
-                        onClick={() => setSelectedAdvisor(adv)}
-                        className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-600 hover:shadow-md transition-shadow text-center group relative cursor-pointer"
-                    >
-                        <div className="w-[80%] aspect-[3/4] mx-auto mb-4 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 relative shadow-inner">
-                            {/* Uses ID instead of Index for persistence */}
-                            <EditableImage 
-                                imageId={`advisor-img-${adv.id}`}
-                                initialSrc={adv.img}
-                                alt="Cố vấn"
-                                className="w-full h-full"
-                                disableEdit={true}
-                                enableLightbox={false} // Disable Grid Lightbox
-                            />
-                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                                <span className="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full">Xem chi tiết</span>
-                            </div>
-                        </div>
-                        <h3 className="font-bold text-lg text-gray-800">
-                            <EditableText id={`advisor-name-${adv.id}`} defaultText={adv.defaultName} />
-                        </h3>
-                        <div className="text-gray-500 text-sm font-medium">
-                            <EditableText id={`advisor-role-${adv.id}`} defaultText={adv.defaultRole} />
-                        </div>
-                        <div className="mt-2 text-xs text-blue-600 font-bold uppercase tracking-wide bg-blue-50 py-1 px-2 rounded-full inline-block">
-                            <EditableText id={`advisor-sub-${adv.id}`} defaultText="Cố vấn chuyên môn" />
-                        </div>
+            <div className="flex flex-wrap justify-center gap-6">
+                {advisorTeam.map((mem, idx) => (
+                    <div key={mem.id} className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-1.5rem)] xl:w-[calc(20%-1.5rem)] max-w-[280px]">
+                        {renderMemberCard(mem, idx)}
                     </div>
                 ))}
-            </div>
-        </div>
 
-        {/* Advisor Detail Modal (Simple) */}
-        {selectedAdvisor && typeof document !== 'undefined' && createPortal(
-            <div 
-                className={`fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-all duration-300 ease-in-out ${isAdvisorClosing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-fade-in'}`} 
-                onClick={handleCloseAdvisor}
-            >
-                <div 
-                    className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-pop-in relative flex flex-col md:flex-row max-h-[90vh] md:h-auto my-auto"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <button 
-                        onClick={handleCloseAdvisor}
-                        className="absolute top-4 right-4 z-20 p-2 bg-black/10 hover:bg-black/20 rounded-full transition-colors text-gray-700"
-                    >
-                        <X size={24} />
-                    </button>
-
-                    {/* Left: Image Side */}
-                    <div className="w-full md:w-2/5 bg-gray-100 relative">
-                        <div className="h-64 md:h-full w-full">
-                            <EditableImage 
-                                imageId={`advisor-img-${selectedAdvisor.id}`}
-                                initialSrc={selectedAdvisor.img}
-                                alt="Advisor Detail"
-                                className="w-full h-full object-cover"
-                                disableEdit={false} // Enable edit inside modal
-                            />
-                        </div>
-                    </div>
-
-                    {/* Right: Info Side */}
-                    <div className="w-full md:w-3/5 p-6 md:p-10 flex flex-col justify-center">
-                        <div className="mb-6">
-                            <h2 className="text-2xl font-bold font-serif text-history-dark mb-2">
-                                <EditableText id={`advisor-name-${selectedAdvisor.id}`} defaultText={selectedAdvisor.defaultName} />
-                            </h2>
-                            <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-800">
-                                Cố vấn dự án
-                            </div>
-                        </div>
-
-                        <div className="space-y-2 mb-6">
-                            <p className="text-gray-500 font-medium">
-                                <EditableText id={`advisor-role-${selectedAdvisor.id}`} defaultText={selectedAdvisor.defaultRole} />
-                            </p>
-                        </div>
-
-                        <div className="bg-history-paper p-6 rounded-2xl border border-history-gold/30 relative">
-                            <Quote size={32} className="absolute -top-3 -left-1 text-history-gold/20 fill-current" />
-                            <div className="text-gray-700 italic text-sm leading-relaxed text-justify relative z-10 font-serif">
-                                <EditableText 
-                                    id={`advisor-quote-${selectedAdvisor.id}`} 
-                                    multiline 
-                                    defaultText="Lời khuyên hoặc châm ngôn sống của cố vấn..." 
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>,
-            document.body
-        )}
-
-        {/* Team Members Section */}
-        <div id="about-team">
-            <h2 className="text-2xl font-bold font-serif text-history-dark mb-6 border-l-4 border-history-red pl-4">
-                <EditableText id="about-team-title" defaultText="Đội Ngũ Xây Dựng" />
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                {visibleTeam.map((mem, idx) => {
-                    const isCoFounder = idx < 2;
-                    const style = getMemberStyle(idx);
-
-                    return (
-                        <div 
-                            key={mem.id} 
-                            onClick={() => setSelectedMember(mem)}
-                            className={`bg-white p-6 rounded-xl shadow-sm border-t-4 ${style.border} hover:shadow-lg transition-all text-center group cursor-pointer h-full flex flex-col relative`}
-                        >
-                            {/* Delete Button (Admin Only) */}
-                            {isAdmin && (
-                                <button 
-                                    onClick={(e) => confirmDelete(e, mem)}
-                                    className="absolute top-2 right-2 p-1.5 bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 rounded-full transition-colors z-20"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
-                            )}
-
-                            <div className={`w-[80%] aspect-[3/4] mx-auto mb-4 rounded-xl overflow-hidden border border-gray-200 ${style.bg} relative shadow-inner group-hover:scale-105 transition-transform duration-300`}>
-                                {/* Uses ID instead of Index */}
-                                <EditableImage 
-                                    imageId={`team-img-${mem.id}`}
-                                    initialSrc={mem.img}
-                                    alt="Thành viên"
-                                    className="w-full h-full"
-                                    disableEdit={true} 
-                                    enableLightbox={false} // Disable Grid Lightbox
-                                />
-                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                                    <span className="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full">Xem chi tiết</span>
-                                </div>
-                            </div>
-                            <h3 className={`font-bold text-lg ${style.text} whitespace-normal leading-tight mb-1`}>
-                                <EditableText id={`team-name-${mem.id}`} defaultText={mem.defaultName} />
-                            </h3>
-                            <div className="text-gray-500 text-xs font-medium mb-3">
-                                <EditableText id={`team-role-title-${mem.id}`} defaultText={isCoFounder ? "Sáng lập viên" : "Thành viên nòng cốt"} />
-                            </div>
-                            <div className="mt-auto">
-                                <div className={`inline-block text-xs font-bold uppercase tracking-wide ${style.badge} py-1 px-2 rounded-full`}>
-                                    <EditableText id={`team-role-${mem.id}`} defaultText={mem.defaultRole} />
-                                </div>
-                            </div>
-                        </div>
-                    )
-                })}
-
-                {/* Add Member Button (Admin Only) */}
+                {/* Add Advisor Button */}
                 {isAdmin && (
-                    <button 
-                        onClick={handleAddMember}
-                        className="bg-gray-50 border-2 border-dashed border-gray-300 p-6 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all min-h-[300px]"
-                    >
-                        <Plus size={40} />
-                        <span className="font-bold mt-2">Thêm thành viên</span>
-                    </button>
+                    <div className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-1.5rem)] xl:w-[calc(20%-1.5rem)] max-w-[280px]">
+                        <button 
+                            onClick={() => handleAddMember('advisor')}
+                            className="w-full bg-gray-50 border-2 border-dashed border-gray-300 p-6 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all min-h-[300px] h-full"
+                        >
+                            <Plus size={40} />
+                            <span className="font-bold mt-2">Thêm cố vấn</span>
+                        </button>
+                    </div>
                 )}
             </div>
         </div>
@@ -601,6 +509,7 @@ const AboutPage: React.FC = () => {
                                 alt="Member Detail"
                                 className="w-full h-full object-cover"
                                 disableEdit={false} // Enable edit here in modal
+                                editButtonPosition="left"
                             />
                         </div>
                         {/* Mobile Overlay Gradient */}
@@ -710,6 +619,77 @@ const AboutPage: React.FC = () => {
             title="Xóa thành viên?"
             message={`Bạn có chắc muốn xóa "${memberToDelete?.defaultName}" khỏi danh sách không?`}
         />
+
+        {/* Add Member Modal */}
+        {isAddModalOpen && typeof document !== 'undefined' && createPortal(
+            <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in">
+                <div className="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl relative p-8">
+                    <button 
+                        onClick={() => setIsAddModalOpen(false)}
+                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
+
+                    <div className="text-center mb-8">
+                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <Users size={32} />
+                        </div>
+                        <h3 className="text-2xl font-bold text-history-dark">Thêm Thành Viên</h3>
+                        <p className="text-gray-500 text-sm mt-1">Nhập thông tin cho thành viên mới của đội ngũ.</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">Họ và tên *</label>
+                            <input 
+                                type="text"
+                                value={newMemberData.name}
+                                onChange={(e) => setNewMemberData({...newMemberData, name: e.target.value})}
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                placeholder="VD: Nguyễn Văn A"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">Vai trò</label>
+                            <input 
+                                type="text"
+                                value={newMemberData.role}
+                                onChange={(e) => setNewMemberData({...newMemberData, role: e.target.value})}
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                placeholder="VD: Co-Founder, Thành viên..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">Lớp / Khóa</label>
+                            <input 
+                                type="text"
+                                value={newMemberData.class}
+                                onChange={(e) => setNewMemberData({...newMemberData, class: e.target.value})}
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                placeholder="VD: Lớp 12A1"
+                            />
+                        </div>
+                        
+                        <div className="pt-4 flex gap-3">
+                            <button 
+                                onClick={() => setIsAddModalOpen(false)}
+                                className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-all"
+                            >
+                                Hủy
+                            </button>
+                            <button 
+                                onClick={submitAddMember}
+                                className="flex-1 py-3 bg-history-dark text-history-gold rounded-xl font-bold hover:bg-black shadow-lg shadow-gray-200 transition-all"
+                            >
+                                Xác nhận
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>,
+            document.body
+        )}
 
         {/* Technology Stack Section - Marquee Loop */}
         <div id="about-tech" className="mb-4 overflow-hidden">
@@ -833,10 +813,10 @@ const AboutPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="text-lg font-bold text-history-dark font-serif">
-                                        <EditableText id="team-name-contact" defaultText="Team Tường Thành Vững Chắc" />
+                                        <EditableText id="team-name-contact" defaultText="The Black Swans" />
                                     </h3>
                                     <p className="text-history-red font-medium text-sm italic">
-                                        <EditableText id="team-slogan-contact" defaultText='"Lịch sử là tường thành vững chắc cho tương lai"' />
+                                        <EditableText id="team-slogan-contact" defaultText='"Live in silence, but go vibrant."' />
                                     </p>
                                 </div>
                             </div>
@@ -845,13 +825,7 @@ const AboutPage: React.FC = () => {
                                     <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-red-600 shrink-0 shadow-sm border border-gray-100">
                                         <Mail size={14} />
                                     </div>
-                                    <span className="font-medium text-sm"><EditableText id="team-email-contact" defaultText="tnt.fortress.ai.team@gmail.com" /></span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-600 shrink-0 shadow-sm border border-gray-100">
-                                        <Facebook size={14} />
-                                    </div>
-                                    <span className="font-medium text-sm"><EditableText id="team-fb-contact" defaultText="facebook.com/lichsuallinone" /></span>
+                                    <span className="font-medium text-sm"><EditableText id="team-email-contact" defaultText="iamlnp@poln.id.vn" /></span>
                                 </div>
                             </div>
                         </div>

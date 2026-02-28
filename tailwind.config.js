@@ -3,10 +3,7 @@
 export default {
   content: [
     "./index.html",
-    "./*.{js,ts,jsx,tsx}", // Quét các file ở thư mục gốc (App.tsx, index.tsx...)
-    "./components/**/*.{js,ts,jsx,tsx}", // Quét toàn bộ trong components
-    "./contexts/**/*.{js,ts,jsx,tsx}", // Quét toàn bộ trong contexts
-    "./services/**/*.{js,ts,jsx,tsx}", // Quét toàn bộ trong services (nếu có dùng class ở đây)
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {

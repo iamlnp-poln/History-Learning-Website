@@ -72,6 +72,7 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   content?: string;
+  image?: string;
 }
 
 export type QuizMode = 'mcq' | 'tf_group' | 'mix';

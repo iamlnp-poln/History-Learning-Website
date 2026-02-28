@@ -175,13 +175,16 @@ const QuizPage: React.FC<QuizPageProps> = ({ quizState, setQuizState, chatHistor
     if (!currentQuestion) return `Câu 1`;
 
     if (currentQuestion.type === 'mcq') {
-        return `Câu ${currentScorableItemStartNumber}`;
+        const mcqIndex = quizState.questions.slice(0, quizState.currentIdx).filter(q => q.type === 'mcq').length + 1;
+        const totalMcq = quizState.questions.filter(q => q.type === 'mcq').length;
+        return `Phần I: Câu ${mcqIndex}/${totalMcq}`;
     } else if (currentQuestion.type === 'tf_group') {
-        const endNumber = currentScorableItemStartNumber + (currentQuestion.subQuestions?.length || 4) - 1;
-        return `Câu ${currentScorableItemStartNumber} - ${endNumber}`;
+        const tfIndex = quizState.questions.slice(0, quizState.currentIdx).filter(q => q.type === 'tf_group').length + 1;
+        const totalTf = quizState.questions.filter(q => q.type === 'tf_group').length;
+        return `Phần II: Câu ${tfIndex}/${totalTf}`;
     }
-    return `Câu ${quizState.currentIdx + 1}`;
-  }, [quizState.currentIdx, quizState.questions, currentScorableItemStartNumber]);
+    return `Câu ${quizState.currentIdx + 1}/${quizState.questions.length}`;
+  }, [quizState.currentIdx, quizState.questions]);
 
   useEffect(() => {
       const checkSaved = async () => {
@@ -211,6 +214,25 @@ const QuizPage: React.FC<QuizPageProps> = ({ quizState, setQuizState, chatHistor
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chatHistory, showChat]);
+
+  // Countdown Timer Logic
+  useEffect(() => {
+      let interval: NodeJS.Timeout;
+      if (quizState.isActive && quizState.isExamMode) {
+          interval = setInterval(() => {
+              setQuizState(prev => {
+                  if (prev.timer <= 0) {
+                      clearInterval(interval);
+                      return prev;
+                  }
+                  return { ...prev, timer: prev.timer - 1 };
+              });
+          }, 1000);
+      }
+      return () => {
+          if (interval) clearInterval(interval);
+      };
+  }, [quizState.isActive, quizState.isExamMode]);
 
   useEffect(() => {
       if (quizState.isExamMode && quizState.isActive && quizState.timer === 0) {
@@ -812,9 +834,11 @@ const QuizPage: React.FC<QuizPageProps> = ({ quizState, setQuizState, chatHistor
   );
 
   // New Grid System for Progress to ensure squares and centering
-  const renderProgressGrid = () => (
-      <div className="grid grid-cols-5 gap-2 w-full place-items-center">
-          {quizState.questions.map((_, i) => {
+  const renderProgressGrid = () => {
+      const mcqQuestions = quizState.questions.map((q, i) => ({ q, i })).filter(item => item.q.type === 'mcq' || !item.q.type);
+      const tfQuestions = quizState.questions.map((q, i) => ({ q, i })).filter(item => item.q.type === 'tf_group');
+
+      const renderButton = (i: number) => {
             let cls = "w-full aspect-square flex items-center justify-center font-bold text-sm rounded-xl border transition-all cursor-pointer transform ";
             if (i === quizState.currentIdx) cls += "ring-2 ring-history-gold ring-offset-2 scale-105 ";
             
@@ -836,10 +860,34 @@ const QuizPage: React.FC<QuizPageProps> = ({ quizState, setQuizState, chatHistor
             }
             return (
                 <button key={i} onClick={() => updateQuizState({ currentIdx: i })} className={cls}>{i + 1}</button>
-            )
-          })}
-      </div>
-  );
+            );
+      };
+
+      if (tfQuestions.length > 0) {
+          return (
+              <div className="w-full flex flex-col gap-4">
+                  <div>
+                      <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">Phần I: Trắc nghiệm</h4>
+                      <div className="grid grid-cols-5 gap-2 w-full place-items-center">
+                          {mcqQuestions.map(item => renderButton(item.i))}
+                      </div>
+                  </div>
+                  <div>
+                      <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">Phần II: Đúng/Sai</h4>
+                      <div className="grid grid-cols-5 gap-2 w-full place-items-center">
+                          {tfQuestions.map(item => renderButton(item.i))}
+                      </div>
+                  </div>
+              </div>
+          );
+      }
+
+      return (
+          <div className="grid grid-cols-5 gap-2 w-full place-items-center">
+              {quizState.questions.map((_, i) => renderButton(i))}
+          </div>
+      );
+  };
 
   const renderPlayingScreen = () => {
     const q = quizState.questions[quizState.currentIdx];
@@ -861,7 +909,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ quizState, setQuizState, chatHistor
             >
                 <div className="flex items-center gap-2">
                     <span className="font-bold text-gray-700 flex items-center gap-2 text-sm">
-                        <FileText size={16} /> {questionNumberDisplay}/{totalScorableItems}
+                        <FileText size={16} /> {questionNumberDisplay}
                     </span>
                     <div className={`flex items-center gap-2 font-mono font-bold px-2 py-0.5 rounded-lg text-xs ${isExam && quizState.timer < 300 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-gray-100 text-gray-700'}`}>
                         <Clock size={12} /> {formatTime(quizState.timer)}
@@ -914,7 +962,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ quizState, setQuizState, chatHistor
                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${q.type === 'mcq' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
                       {q.type === 'mcq' ? 'Trắc nghiệm' : 'Đúng/Sai'}
                    </span>
-                   <span className="text-gray-400 font-medium">{questionNumberDisplay}/{totalScorableItems}</span>
+                   <span className="text-gray-400 font-medium">{questionNumberDisplay}</span>
                  </div>
                  <div className="flex items-center gap-4">
                     <button onClick={() => setShowExitConfirm(true)} className="text-gray-400 hover:text-red-500 transition-colors" title="Thoát">

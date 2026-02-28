@@ -40,7 +40,17 @@ const { signInWithPopup, signOut, onAuthStateChanged } = firebaseAuth as any;
 
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-history-gold animate-fade-in">
-    <Loader2 size={48} className="animate-spin mb-4" />
+    <svg className="mb-4" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <style>{`
+        .draw { stroke-dasharray: 100; animation: draw 2s ease-in-out infinite; }
+        @keyframes draw { 
+          0% { stroke-dashoffset: 100; } 
+          50% { stroke-dashoffset: 0; } 
+          100% { stroke-dashoffset: -100; } 
+        }
+      `}</style>
+      <path className="draw" pathLength="100" d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+    </svg>
     <p className="text-gray-500 font-medium animate-pulse">Đang tải dữ liệu...</p>
   </div>
 );
@@ -172,27 +182,13 @@ const MainApp = () => {
               <Route path="/explore" element={<TimelinePage searchTerm={searchTerm} onAskAI={setSelectedEvent} resetKey={exploreResetToken} />} />
               <Route path="/documents" element={<DocumentsPage user={user} />} />
               
-              {/* Conditional Routes: Show Content if Staff, else Show Coming Soon */}
-              <Route 
-                path="/heritage" 
-                element={
-                  isRoleLoading ? <PageLoader /> : 
-                  hasStaffAccess ? <HeritagePage /> : 
-                  <ComingSoon 
-                    title="Âm Vang Di Sản" 
-                    description="Không gian triển lãm số về hiện vật, trang phục và kiến trúc Việt Nam đang được đội ngũ biên tập viên xây dựng. Chúng tôi sẽ sớm mở cửa đón khách tham quan!" 
-                  />
-                } 
-              />
+              <Route path="/heritage" element={<HeritagePage />} />
               <Route 
                 path="/magazine" 
                 element={
                   isRoleLoading ? <PageLoader /> : 
                   hasStaffAccess ? <MagazinePage /> : 
-                  <ComingSoon 
-                    title="Tạp Chí Tinh Hoa" 
-                    description="Ấn phẩm số đặc biệt với những bài viết chuyên sâu về văn hóa và lịch sử đang trong giai đoạn dàn trang cuối cùng."
-                  />
+                  <NotFoundPage />
                 } 
               />
               
@@ -207,8 +203,8 @@ const MainApp = () => {
           </Suspense>
         </div>
       </main>
-
-      <Footer />
+      
+      {!(location.pathname === '/quiz' || location.pathname === '/qa') && <Footer />}
       <LightboxViewer />
       {selectedEvent && (
         <AIChatModal 

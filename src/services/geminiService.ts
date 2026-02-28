@@ -81,9 +81,13 @@ export const synthesizeHistoryTopic = async (topic: string): Promise<string> => 
 };
 
 // Hàm mới hỗ trợ Chat hội thoại liên tục
-export const sendMessageToHistoryTutor = async (history: ChatMessage[], newMessage: string): Promise<string> => {
+export const sendMessageToHistoryTutor = async (
+    history: ChatMessage[], 
+    newMessage: string, 
+    attachment?: { data: string, mimeType: string }
+): Promise<string> => {
     try {
-        // FIX: Updated deprecated model 'gemini-2.5-flash' to 'gemini-3-flash-preview' as per Gemini API guidelines.
+        // FIX: Updated deprecated model 'gemini-3-flash-preview' to 'gemini-3-flash-preview' (already correct)
         const model = 'gemini-3-flash-preview';
         
         // Convert internal ChatMessage type to Gemini Content type
@@ -92,10 +96,23 @@ export const sendMessageToHistoryTutor = async (history: ChatMessage[], newMessa
             parts: [{ text: msg.text || msg.content || "" }]
         }));
 
+        // Construct the new message parts
+        const parts: any[] = [{ text: newMessage }];
+        
+        // Add attachment if present
+        if (attachment) {
+            parts.push({
+                inlineData: {
+                    data: attachment.data,
+                    mimeType: attachment.mimeType
+                }
+            });
+        }
+
         // Add the new message
         contents.push({
             role: 'user',
-            parts: [{ text: newMessage }]
+            parts: parts
         });
 
         const response = await ai.models.generateContent({
@@ -221,84 +238,85 @@ export const explainQuizDeeply = async (content: string): Promise<string> => {
 
 export const generateTHPTExam = async (matrixJson: any): Promise<QuizQuestion[]> => {
     try {
-        const matrixString = JSON.stringify(matrixJson);
-        const prompt = `
-            Hãy đóng vai một chuyên gia ra đề thi Tốt nghiệp THPT Quốc gia môn Lịch sử.
-            Dựa vào MA TRẬN ĐỀ THI (JSON) dưới đây, hãy tạo ra một đề thi hoàn chỉnh.
+        let allQuestions: QuizQuestion[] = [];
+        const topics = matrixJson.matrix_data || [];
+
+        for (const topicData of topics) {
+            const numMcq = Object.values(topicData.part_1 as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
+            const numTf = Object.values(topicData.part_2 as Record<string, number>).reduce((a: number, b: number) => a + b, 0) / 4;
             
-            [MA TRẬN ĐỀ]
-            ${matrixString}
+            if (topicData.total_questions === 0) continue;
 
-            YÊU CẦU NGHIÊM NGẶT VỀ OUTPUT JSON:
-            Output trả về MỘT mảng JSON chứa các câu hỏi.
-            
-            1. Dạng Trắc nghiệm nhiều lựa chọn (Phần I - mcq):
-            {
-                "type": "mcq",
-                "context": "Tùy chọn: Một đoạn văn bản lịch sử ngắn nếu câu hỏi cần bối cảnh...",
-                "question": "Nội dung câu hỏi đầy đủ...",
-                "options": ["Phương án 1", "Phương án 2", "Phương án 3", "Phương án 4"],
-                "correctIndex": 0,
-                "explanation": "Giải thích chi tiết..."
-            }
-            *Lưu ý: "options" không chứa A, B, C, D ở đầu.
+            const prompt = `
+                Hãy đóng vai một chuyên gia ra đề thi Tốt nghiệp THPT Quốc gia môn Lịch sử.
+                Dựa vào YÊU CẦU CHỦ ĐỀ dưới đây, hãy tạo ra các câu hỏi trắc nghiệm.
+                
+                [YÊU CẦU CHỦ ĐỀ]
+                ${JSON.stringify(topicData)}
 
-            2. Dạng Trắc nghiệm Đúng/Sai (Phần II - tf_group):
-            {
-                "type": "tf_group",
-                "context": "Đoạn tư liệu lịch sử cụ thể (khoảng 50-100 chữ). Có thể là văn bản, bảng biểu, hoặc trích dẫn nghị quyết. BẮT BUỘC PHẢI CÓ NỘI DUNG, KHÔNG ĐỂ TRỐNG.",
-                "subQuestions": [
-                    {"text": "Nội dung mệnh đề 1...", "answer": true},
-                    {"text": "Nội dung mệnh đề 2...", "answer": false},
-                    {"text": "Nội dung mệnh đề 3...", "answer": true},
-                    {"text": "Nội dung mệnh đề 4...", "answer": false}
-                ],
-                "explanation": "Giải thích..."
-            }
-            *Lưu ý: "text" trong "subQuestions" chỉ chứa nội dung mệnh đề, TUYỆT ĐỐI KHÔNG chứa tiền tố như "Mệnh đề 1:", "1.", v.v.
-
-            *** QUY TẮC QUAN TRỌNG NHẤT VỀ SỐ LƯỢNG ***
-            1.  Tổng số câu hỏi (question objects) trong mảng JSON đầu ra phải là 28, bao gồm:
-                -   24 câu dạng "mcq".
-                -   4 câu dạng "tf_group".
-            2.  Mỗi câu "tf_group" BẮT BUỘC phải có 4 "subQuestions".
-            3.  Tổng số "lệnh hỏi" (scorable items) phải là 40 (24 mcq + 4 * 4 subQuestions).
-            4.  Phân bổ các câu hỏi này theo chủ đề và cấp độ tư duy được mô tả trong ma trận.
-
-            YÊU CẦU NỘI DUNG:
-            - Nội dung bám sát chương trình GDPT môn Lịch sử (Lớp 11 & 12, Bộ Chân trời sáng tạo).
-            - Đảm bảo tính chính xác khoa học.
-            - Trường "context":
-                - Nếu là nội dung do AI tự tạo, KHÔNG đặt trong dấu ngoặc kép "".
-                - Nếu trích dẫn, PHẢI đính kèm nguồn (VD: "(Nguồn: SGK Lịch sử 12)").
-                - Có thể là đoạn văn, bảng biểu, hoặc trích dẫn nghị quyết.
-            - Phải có ÍT NHẤT 1 câu trắc nghiệm (mcq) có "context" để kiểm tra khả năng đọc hiểu.
-        `;
-
-        const response = await ai.models.generateContent({
-            // FIX: Updated deprecated model 'gemini-2.5-flash' to 'gemini-3-flash-preview' as per Gemini API guidelines.
-            model: 'gemini-3-flash-preview',
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                systemInstruction: SAFETY_SYSTEM_INSTRUCTION
-            }
-        });
-
-        // FIX: Access the 'text' property directly instead of calling a method.
-        if (response.text) {
-            const cleanJson = response.text.replace(/```json|```/g, '').trim();
-            const questions = JSON.parse(cleanJson) as QuizQuestion[];
-            
-            // Post-processing to fallback empty context
-            return questions.map(q => {
-                if (q.type === 'tf_group' && (!q.context || q.context.trim() === "")) {
-                    q.context = "Dựa vào kiến thức lịch sử đã học, hãy xác định tính đúng sai của các mệnh đề sau:";
+                YÊU CẦU NGHIÊM NGẶT VỀ OUTPUT JSON:
+                Output trả về MỘT mảng JSON chứa các câu hỏi.
+                
+                1. Dạng Trắc nghiệm nhiều lựa chọn (Phần I - mcq):
+                {
+                    "type": "mcq",
+                    "context": "Tùy chọn: Một đoạn văn bản lịch sử ngắn nếu câu hỏi cần bối cảnh...",
+                    "question": "Nội dung câu hỏi đầy đủ...",
+                    "options": ["Phương án 1", "Phương án 2", "Phương án 3", "Phương án 4"],
+                    "correctIndex": 0,
+                    "explanation": "Giải thích chi tiết..."
                 }
-                return q;
+                *Lưu ý: "options" không chứa A, B, C, D ở đầu.
+
+                2. Dạng Trắc nghiệm Đúng/Sai (Phần II - tf_group):
+                {
+                    "type": "tf_group",
+                    "context": "Đoạn tư liệu lịch sử cụ thể (khoảng 50-100 chữ). Có thể là văn bản, bảng biểu, hoặc trích dẫn nghị quyết. BẮT BUỘC PHẢI CÓ NỘI DUNG, KHÔNG ĐỂ TRỐNG.",
+                    "subQuestions": [
+                        {"text": "Nội dung mệnh đề 1...", "answer": true},
+                        {"text": "Nội dung mệnh đề 2...", "answer": false},
+                        {"text": "Nội dung mệnh đề 3...", "answer": true},
+                        {"text": "Nội dung mệnh đề 4...", "answer": false}
+                    ],
+                    "explanation": "Giải thích..."
+                }
+                *Lưu ý: "text" trong "subQuestions" chỉ chứa nội dung mệnh đề, TUYỆT ĐỐI KHÔNG chứa tiền tố như "Mệnh đề 1:", "1.", v.v.
+
+                *** QUY TẮC QUAN TRỌNG NHẤT VỀ SỐ LƯỢNG ***
+                1. Tổng số câu hỏi (question objects) trong mảng JSON đầu ra phải là ${topicData.total_questions}.
+                2. Cụ thể: Tạo đúng ${numMcq} câu dạng "mcq" và ${numTf} câu dạng "tf_group".
+                3. Mỗi câu "tf_group" BẮT BUỘC phải có 4 "subQuestions".
+                4. Nội dung bám sát chương trình GDPT môn Lịch sử (Lớp ${topicData.grade}, Bộ Chân trời sáng tạo).
+                5. Đảm bảo tính chính xác khoa học.
+            `;
+
+            const response = await ai.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: prompt,
+                config: {
+                    responseMimeType: "application/json",
+                    systemInstruction: SAFETY_SYSTEM_INSTRUCTION
+                }
             });
+
+            if (response.text) {
+                const cleanJson = response.text.replace(/```json|```/g, '').trim();
+                const questions = JSON.parse(cleanJson) as QuizQuestion[];
+                
+                const processedQuestions = questions.map(q => {
+                    if (q.type === 'tf_group' && (!q.context || q.context.trim() === "")) {
+                        q.context = "Dựa vào kiến thức lịch sử đã học, hãy xác định tính đúng sai của các mệnh đề sau:";
+                    }
+                    return q;
+                });
+                allQuestions = [...allQuestions, ...processedQuestions];
+            }
         }
-        return [];
+        
+        // Sort questions: mcq first, then tf_group
+        const mcqQuestions = allQuestions.filter(q => q.type === 'mcq');
+        const tfQuestions = allQuestions.filter(q => q.type === 'tf_group');
+        return [...mcqQuestions, ...tfQuestions];
     } catch (error) {
         console.error("Generate THPT Exam Error:", error);
         throw error;

@@ -89,7 +89,7 @@ const HomePage: React.FC = () => {
                </div>
             </div>
             <div className="p-4 border-t border-gray-200 bg-white flex justify-end">
-               <button onClick={() => handleNav('/explore')} className="bg-history-red text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-red-800 transition-colors shadow-lg active:scale-95">
+               <button onClick={() => handleNav(`/explore?view=vn-events&mode=both&stageId=${selectedStage.id}`)} className="bg-history-red text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-red-800 transition-colors shadow-lg active:scale-95">
                  Khám phá chi tiết <ArrowRight size={18} />
                </button>
             </div>
@@ -107,8 +107,8 @@ const HomePage: React.FC = () => {
         </div>
         <div className="absolute inset-0 bg-black/60 z-0 pointer-events-none"></div>
         <div className="max-w-4xl mx-auto relative z-10">
-          <EditableText id="home-hero-title" tag="h1" defaultText="Lịch Sử All-In-One" className="text-4xl md:text-6xl font-bold mb-6 font-serif text-history-gold drop-shadow-md" />
-          <EditableText id="home-hero-subtitle" tag="p" multiline defaultText={`"Lịch sử là tường thành vững chắc cho tương lai"`} className="text-xl md:text-2xl text-gray-200 mb-8 font-serif italic drop-shadow-sm" />
+          <EditableText id="home-hero-title" tag="h1" defaultText="Trạm Lịch Sử 4.0" className="text-4xl md:text-6xl font-bold mb-6 font-serif text-history-gold drop-shadow-md" />
+          <EditableText id="home-hero-subtitle" tag="p" multiline defaultText={`"Nhịp cầu số giữa ngàn năm văn hiến."`} className="text-xl md:text-2xl text-gray-200 mb-8 font-serif italic drop-shadow-sm" />
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button onClick={() => handleNav('/explore')} className="bg-history-gold text-history-dark px-8 py-3 rounded-full font-bold hover:bg-yellow-500 transition-transform transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2">
               <BookOpen size={20} /> Bắt Đầu Khám Phá
@@ -125,7 +125,7 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <EditableText id="home-intro-title" tag="h2" defaultText="Giới Thiệu Chung" className="text-3xl font-bold text-history-red mb-4 font-serif" />
-              <EditableText id="home-intro-p1" tag="p" multiline defaultText="Chào mừng bạn đến với dự án Lịch Sử All-In-One. Đây là dự án ý tưởng khởi nghiệp (Startup Idea) đang được triển khai thử nghiệm (Pilot) trên nền tảng hạ tầng giới hạn, với sứ mệnh cách mạng hóa phương pháp học tập Lịch sử cho học sinh THPT." className="text-gray-700 leading-relaxed mb-4" />
+              <EditableText id="home-intro-p1" tag="p" multiline defaultText="Chào mừng bạn đến với Trạm Lịch Sử 4.0. Đây là dự án giải pháp ứng dụng công nghệ số và AI vào môn lịch sử, với sứ mệnh cách mạng hóa phương pháp học tập Lịch sử cho học sinh THPT." className="text-gray-700 leading-relaxed mb-4" />
               <EditableText id="home-intro-p2" tag="p" multiline defaultText="Chúng tôi tin rằng Lịch sử không chỉ là quá khứ mà là nền tảng của tương lai. Với việc thử nghiệm ứng dụng công nghệ số và AI, chúng tôi mong muốn tạo ra một hệ sinh thái học tập toàn diện, nơi kiến thức Lịch sử Việt Nam và Thế giới được kết nối chặt chẽ và sống động." className="text-gray-700 leading-relaxed mb-4" />
             </div>
             <div className="relative h-64 md:h-80 rounded-xl overflow-hidden shadow-md">
@@ -196,7 +196,7 @@ const HomePage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
            {OVERVIEW_STAGES.map((stage, idx) => (
-             <div key={idx} className="bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl hover:border-history-gold transition-all duration-300 group flex flex-col h-full relative" >
+             <div key={idx} className="bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl hover:border-history-gold transition-all duration-300 group flex flex-col h-full relative cursor-pointer" onClick={() => handleViewDetails(stage)}>
                 <div className="h-40 w-full bg-gray-100 overflow-hidden relative rounded-t-2xl">
                     <EditableImage imageId={`home-stage-thumb-${stage.id}`} initialSrc={stage.image} alt={stage.title} className="w-full h-full" enableLightbox={false} />
                     <div className="absolute top-2 left-2 bg-red-600 text-white px-3 py-1 rounded-md font-bold text-xs shadow-md z-10">{stage.period}</div>
@@ -209,7 +209,7 @@ const HomePage: React.FC = () => {
                       <EditableText id={`stage-card-content-${idx}`} multiline defaultText={stage.content} tag="p"/>
                     </div>
                     <button onClick={() => handleViewDetails(stage)} className="mt-auto pt-4 flex justify-between items-center border-t border-gray-100 w-full text-left group/button cursor-pointer">
-                       <span className="text-xs font-bold text-gray-400 uppercase group-hover/button:text-history-red transition-colors">Xem chi tiết</span>
+                       <span className="text-xs font-bold text-gray-400 uppercase group-hover/button:text-history-red transition-colors">Xem tóm tắt</span>
                        <div className="bg-history-gold/10 p-2 rounded-full text-history-gold group-hover/button:bg-history-gold group-hover/button:text-white transition-colors">
                           <ArrowRight size={16} />
                        </div>

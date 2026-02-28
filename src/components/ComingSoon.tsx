@@ -9,7 +9,7 @@ interface ComingSoonProps {
 
 const ComingSoon: React.FC<ComingSoonProps> = ({ 
   title = "Tính Năng Mới", 
-  description = "Đội ngũ biên tập Tường Thành Vững Chắc đang nỗ lực hoàn thiện nội dung này. Hãy quay lại sớm nhé!" 
+  description = "Đội ngũ biên tập The Black Swans đang nỗ lực hoàn thiện nội dung này. Hãy quay lại sớm nhé!" 
 }) => {
   const navigate = useNavigate();
 
@@ -57,7 +57,7 @@ const ComingSoon: React.FC<ComingSoonProps> = ({
       </div>
       
       <div className="mt-8 text-xs text-gray-400 font-mono">
-        Project: Lich Su All-In-One &copy; 2025
+        Project: Trạm Lịch Sử 4.0 &copy; 2025
       </div>
     </div>
   );

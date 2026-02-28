@@ -57,11 +57,12 @@ const Navbar: React.FC<NavbarProps> = ({ user, userRole, onLogin, onLogout, sear
   };
 
   const navContainerClass = isTransparentMode
-    ? `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isTransparentMode && !isScrolled ? 'bg-black/20 backdrop-blur-md shadow-sm border-b border-white/10' : 'bg-history-red shadow-lg border-none'}`
-    : `sticky top-0 z-50 transition-all duration-300 bg-history-red shadow-lg`;
+    ? `fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${isTransparentMode && !isScrolled ? 'bg-black/20 backdrop-blur-md shadow-sm border-b border-white/10' : 'bg-history-red shadow-lg border-none'}`
+    : `fixed top-0 left-0 right-0 z-[100] transition-all duration-300 bg-history-red shadow-lg`;
 
   return (
     <>
+      {!isTransparentMode && <div className="h-16 w-full shrink-0"></div>}
       <nav className={`${navContainerClass} text-white`} ref={dropdownRef}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -70,17 +71,25 @@ const Navbar: React.FC<NavbarProps> = ({ user, userRole, onLogin, onLogout, sear
               <Link to="/" onClick={() => handleNavClick('/')} className="flex items-center gap-2">
                 {logoUrl ? <img src={logoUrl} alt="Logo" className="h-8 w-auto" /> : <BookOpen className="text-history-gold" />}
                 <span className="font-serif font-bold text-lg md:text-xl tracking-wide truncate">
-                    <span className="md:hidden">Lịch Sử AIO</span>
-                    <span className="hidden md:inline">Lịch Sử All-In-One</span>
+                    <span className="md:hidden">Trạm Lịch Sử 4.0</span>
+                    <span className="hidden md:inline">Trạm Lịch Sử 4.0</span>
                 </span>
               </Link>
             </div>
 
-            <div className="hidden lg:flex flex-1 max-w-md mx-8">
+            <div className="hidden lg:flex flex-1 justify-center px-8">
               {currentPath === '/explore' ? (
-                <div className="relative w-full text-gray-600">
-                  <input type="search" placeholder="Tìm kiếm..." value={searchTerm} onChange={(e) => onSearchChange(e.target.value)} className="bg-gray-50 h-10 px-5 pr-10 rounded-full text-sm w-full" />
-                  <div className="absolute right-0 top-0 mt-2.5 mr-4"><Search size={20} className="text-gray-400" /></div>
+                <div className="relative w-full max-w-xl text-gray-600">
+                  <input 
+                    type="search" 
+                    placeholder="Tìm kiếm..." 
+                    value={searchTerm} 
+                    onChange={(e) => onSearchChange(e.target.value)} 
+                    className="bg-white/95 h-10 px-5 pr-12 rounded-full text-sm w-full shadow-inner focus:ring-2 focus:ring-history-gold outline-none transition-all" 
+                  />
+                  <div className="absolute right-0 top-0 h-full flex items-center pr-4">
+                    <Search size={18} className="text-gray-400" />
+                  </div>
                 </div>
               ) : <div className="flex-1"></div>}
             </div>
@@ -97,12 +106,12 @@ const Navbar: React.FC<NavbarProps> = ({ user, userRole, onLogin, onLogout, sear
                         
                         <button onClick={() => handleNavClick('/heritage')} className="w-full flex items-center gap-3 px-5 py-3 hover:bg-red-50 hover:text-history-red text-blue-700 font-bold group">
                             <Sparkles size={18} /> Âm Vang Di Sản
-                            {!hasStaffAccess && <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded ml-auto">Mới</span>}
                         </button>
-                        <button onClick={() => handleNavClick('/magazine')} className="w-full flex items-center gap-3 px-5 py-3 hover:bg-red-50 hover:text-history-red text-blue-700 font-bold group">
-                            <Newspaper size={18} /> Tạp Chí Tinh Hoa
-                            {!hasStaffAccess && <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded ml-auto">Mới</span>}
-                        </button>
+                        {hasStaffAccess && (
+                            <button onClick={() => handleNavClick('/magazine')} className="w-full flex items-center gap-3 px-5 py-3 hover:bg-red-50 hover:text-history-red text-blue-700 font-bold group">
+                                <Newspaper size={18} /> Tạp Chí Tinh Hoa
+                            </button>
+                        )}
 
                         <button onClick={() => handleNavClick('/documents')} className="w-full flex items-center gap-3 px-5 py-3 hover:bg-red-50 hover:text-history-red"><Book size={18} /> Kho Tài Liệu</button>
                         <div className="border-t border-gray-100 my-1"></div>
@@ -145,10 +154,10 @@ const Navbar: React.FC<NavbarProps> = ({ user, userRole, onLogin, onLogout, sear
       </nav>
 
       {/* Mobile Sidebar */}
-      <div className={`fixed inset-0 bg-black/50 z-[60] lg:hidden transition-opacity ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => setIsMenuOpen(false)} />
-      <div className={`fixed top-0 left-0 h-full w-[280px] bg-history-red z-[70] transition-transform lg:hidden flex flex-col ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed inset-0 bg-black/50 z-[110] lg:hidden transition-opacity ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => setIsMenuOpen(false)} />
+      <div className={`fixed top-0 left-0 h-full w-[280px] bg-history-red z-[120] transition-transform lg:hidden flex flex-col ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between p-4 border-b border-red-800">
-          <span className="font-serif font-bold text-xl text-white">Lịch Sử AIO</span>
+          <span className="font-serif font-bold text-xl text-white">Trạm Lịch Sử 4.0</span>
           <button onClick={() => setIsMenuOpen(false)} className="text-white"><X size={24} /></button>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -156,11 +165,13 @@ const Navbar: React.FC<NavbarProps> = ({ user, userRole, onLogin, onLogout, sear
           <button onClick={() => handleNavClick('/explore')} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors"><Compass size={20} /> Khám Phá</button>
           
           <button onClick={() => handleNavClick('/heritage')} className="w-full flex items-center gap-3 px-4 py-3 text-history-gold font-bold hover:bg-white/10 rounded-xl transition-colors">
-              <Sparkles size={20} /> Âm Vang Di Sản {!hasStaffAccess && <span className="text-[9px] bg-white/20 text-white px-1.5 py-0.5 rounded ml-auto">Sắp ra mắt</span>}
+              <Sparkles size={20} /> Âm Vang Di Sản
           </button>
-          <button onClick={() => handleNavClick('/magazine')} className="w-full flex items-center gap-3 px-4 py-3 text-history-gold font-bold hover:bg-white/10 rounded-xl transition-colors">
-              <Newspaper size={20} /> Tạp Chí Tinh Hoa {!hasStaffAccess && <span className="text-[9px] bg-white/20 text-white px-1.5 py-0.5 rounded ml-auto">Sắp ra mắt</span>}
-          </button>
+          {hasStaffAccess && (
+              <button onClick={() => handleNavClick('/magazine')} className="w-full flex items-center gap-3 px-4 py-3 text-history-gold font-bold hover:bg-white/10 rounded-xl transition-colors">
+                  <Newspaper size={20} /> Tạp Chí Tinh Hoa
+              </button>
+          )}
 
           <button onClick={() => handleNavClick('/documents')} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors"><Book size={20} /> Tài Liệu</button>
           <button onClick={() => handleNavClick('/quiz')} className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors"><GraduationCap size={20} /> Trắc Nghiệm</button>

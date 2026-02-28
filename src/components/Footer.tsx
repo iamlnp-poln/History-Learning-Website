@@ -3,8 +3,12 @@ import React from 'react';
 import { Facebook, Youtube, MapPin, Phone, Mail, Shield, Info, MessageCircle, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import EditableText from './EditableText';
+import { useGlobalData } from '../contexts/GlobalDataContext';
 
 const Footer: React.FC = () => {
+  const { textOverrides } = useGlobalData();
+  const footerEmail = textOverrides['footer-email'] || "tnt.fortress.ai.team@gmail.com";
+
   const handleTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -17,13 +21,13 @@ const Footer: React.FC = () => {
           <div className="space-y-4">
              <div className="flex items-center gap-2 mb-2">
                 <BookOpen className="text-history-gold" />
-                <span className="font-serif font-bold text-xl tracking-wide text-white">Lịch Sử All-In-One</span>
+                <span className="font-serif font-bold text-xl tracking-wide text-white">Trạm Lịch Sử 4.0</span>
               </div>
               <div className="text-sm opacity-80 leading-relaxed">
                 <EditableText 
                     id="footer-intro"
                     multiline
-                    defaultText="Dự án ý tưởng khởi nghiệp EdTech đang chạy thử nghiệm trên hạ tầng giới hạn. Kết nối dữ liệu lịch sử và AI để kiến tạo trải nghiệm học tập mới."
+                    defaultText="Dự án ý tưởng giải pháp ứng dụng công nghệ và AI đang chạy thử nghiệm trên hạ tầng giới hạn. Kết nối dữ liệu lịch sử và AI để kiến tạo trải nghiệm học tập mới."
                     tag="p"
                 />
               </div>
@@ -32,7 +36,7 @@ const Footer: React.FC = () => {
                 onClick={handleTop}
                 className="inline-block text-history-gold text-sm font-bold hover:underline"
               >
-                Về Start-up của chúng tôi &rarr;
+                Về Dự án của chúng tôi &rarr;
               </Link>
           </div>
 
@@ -49,12 +53,12 @@ const Footer: React.FC = () => {
             </div>
             <div className="flex items-center gap-3">
               <Phone className="w-5 h-5 text-history-red shrink-0" />
-              <p className="text-sm"><EditableText id="footer-phone" defaultText="0383 338 262" /></p>
+              <p className="text-sm"><EditableText id="footer-phone" defaultText="0909000000" /></p>
             </div>
             <div className="flex items-center gap-3">
               <Mail className="w-5 h-5 text-history-red shrink-0" />
-              <a href="mailto:tnt.fortress.ai.team@gmail.com" className="text-sm hover:text-history-gold transition-colors">
-                <EditableText id="footer-email" defaultText="tnt.fortress.ai.team@gmail.com" />
+              <a href={`mailto:${footerEmail}`} className="text-sm hover:text-history-gold transition-colors">
+                <EditableText id="footer-email" defaultText="" />
               </a>
             </div>
           </div>
@@ -65,22 +69,13 @@ const Footer: React.FC = () => {
             </h3>
             <div className="flex gap-4 mb-6">
               <a 
-                href="https://web.facebook.com/share/17gEfkaU4k" 
+                href="https://www.facebook.com/thptnguyencongtru.thongtayhoi.hcm" 
                 target="_blank" 
                 rel="noreferrer"
                 className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-transform transform hover:-translate-y-1"
                 title="Facebook Fanpage"
               >
                 <Facebook size={20} />
-              </a>
-              <a 
-                href="https://youtube.com/@newoldies-tnf" 
-                target="_blank" 
-                rel="noreferrer"
-                className="bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-transform transform hover:-translate-y-1"
-                title="Youtube Channel"
-              >
-                <Youtube size={20} />
               </a>
             </div>
 
@@ -118,11 +113,11 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-gray-800 pt-6 mt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
-          <p>&copy; {new Date().getFullYear()} Lịch Sử All-In-One. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Trạm Lịch Sử 4.0. All rights reserved.</p>
           <div className="flex items-center gap-4 mt-2 md:mt-0">
-            <span>Dự án Ý tưởng Khởi nghiệp (Pilot)</span>
+            <span>Dự án Giải pháp Công nghệ và AI</span>
             <span className="hidden md:inline">|</span>
-            <span>Developed by Tường Thành Vững Chắc Team</span>
+            <span>Developed by The Black Swans</span>
           </div>
         </div>
       </div>

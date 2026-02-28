@@ -15,6 +15,55 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Merriweather', serif;
 }
 
+/* Heritage Specific Styles */
+.heritage-bg {
+  background-color: #fff8eb;
+}
+
+.heritage-dropcap:first-of-type::first-letter {
+  float: left;
+  font-family: 'Merriweather', serif;
+  font-size: 5.5rem;
+  font-weight: 700;
+  line-height: 0.8;
+  color: #e7b457;
+  margin-right: 15px;
+  margin-top: 5px;
+}
+
+.heritage-heading {
+  font-family: 'Merriweather', serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.heritage-heading::after {
+  content: "";
+  display: block;
+  width: 100px;
+  height: 3px;
+  background-color: #e7b457;
+  margin: 10px auto 0;
+  border-radius: 2px;
+}
+
+.heritage-quote {
+  background-color: #333;
+  color: #e7b457;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.heritage-image {
+  border-radius: 20px;
+  box-shadow: 10px 10px 30px rgba(0,0,0,0.1);
+  transition: transform 0.5s ease;
+}
+
+.heritage-image:hover {
+  transform: scale(1.03);
+}
+
 /* Utilities previously handled by @layer utilities */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;

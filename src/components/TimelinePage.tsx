@@ -10,7 +10,8 @@ import DiscoveryModal from './DiscoveryModal';
 // REMOVED hardcoded imports for Stages and Figures
 // import { HISTORY_STAGES, VIETNAM_FIGURES, WORLD_FIGURES } from '../data';
 import { HistoricalEvent, HistoryStage, HistoricalFigure } from '../types';
-import { BookOpen, Globe, Users, ArrowLeft, Star, FolderOpen, Target, Flag, Search, X, Loader2, Anchor, ChevronDown, ChevronUp, ArrowUp, Zap, Layout, Columns } from 'lucide-react';
+import { BookOpen, Globe, Users, ArrowLeft, Star, FolderOpen, Target, Flag, Search, X, Loader2, Anchor, ChevronDown, ChevronUp, ArrowUp, Zap, Layout, Columns, GraduationCap } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { synthesizeHistoryTopic } from '../services/geminiService';
 import SimpleMarkdown from './SimpleMarkdown';
 import EditableImage from './EditableImage';
@@ -262,8 +263,32 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ searchTerm, onAskAI, resetK
           setViewingFigure(null);
           setSelectedTopic(null);
       }
-      window.scrollTo(0, 0);
+      
+      const stageId = searchParams.get('stageId');
+      if (!stageId) {
+          window.scrollTo(0, 0);
+      }
   }, [searchParams, mergedStages, allFigures]); // Depend on mergedStages
+
+  // Effect for scrolling to stageId if present
+  useEffect(() => {
+      const stageId = searchParams.get('stageId');
+      if (stageId && !isLoadingData && mergedStages.length > 0) {
+          // Small delay to ensure DOM is rendered
+          const timer = setTimeout(() => {
+              const element = document.getElementById(stageId);
+              if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  // Add a highlight effect
+                  element.classList.add('ring-2', 'ring-history-gold', 'ring-offset-4', 'rounded-xl');
+                  setTimeout(() => {
+                      element.classList.remove('ring-2', 'ring-history-gold', 'ring-offset-4');
+                  }, 3000);
+              }
+          }, 500);
+          return () => clearTimeout(timer);
+      }
+  }, [searchParams, isLoadingData, mergedStages]);
 
   const navigateTo = (view: ViewMode, extraParams: Record<string, string> = {}) => {
       setSearchParams({ view, ...extraParams });
@@ -454,7 +479,8 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ searchTerm, onAskAI, resetK
   };
 
   const renderHeader = (title: string, showModeToggle = false, showBackButton = false) => (
-      <div className="relative bg-history-dark text-white shadow-md overflow-hidden mb-4 group">
+      <div className="relative bg-[#2a1b18] text-white shadow-md overflow-hidden mb-4 group">
+          <div className="absolute inset-0 z-0 opacity-20 mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
           <div className="absolute inset-0 z-0 opacity-40 group-hover:opacity-50 transition-opacity">
               <EditableImage 
                   imageId="timeline-header-bg"
@@ -469,7 +495,7 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ searchTerm, onAskAI, resetK
           {showBackButton && (
               <button 
                   onClick={handleBack}
-                  className="absolute top-6 left-4 md:left-8 z-20 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-all backdrop-blur-sm shadow-md"
+                  className="absolute top-6 left-4 md:left-8 z-20 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-all backdrop-blur-sm shadow-md border border-white/20"
                   title="Quay lại"
               >
                   <ArrowLeft size={24} />
@@ -477,35 +503,58 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ searchTerm, onAskAI, resetK
           )}
 
           <div className="relative z-10 py-8 md:py-12 px-4 text-center">
-              <h1 className="text-2xl md:text-4xl font-bold font-serif text-history-gold mb-2 drop-shadow-md px-12">
+              <h1 className="text-3xl md:text-5xl font-bold font-serif text-history-gold mb-4 drop-shadow-lg px-12 tracking-tight">
                   {title}
               </h1>
               {currentView === 'menu' && (
-                  <p className="text-gray-200 mt-2 max-w-2xl mx-auto text-sm md:text-base drop-shadow-sm">
+                  <p className="text-gray-200 mt-2 max-w-2xl mx-auto text-sm md:text-base drop-shadow-sm font-medium">
                       Khám phá kho tàng kiến thức lịch sử qua các sự kiện và nhân vật tiêu biểu.
                   </p>
               )}
               
               {showModeToggle && (
-                  <div className="mt-6 flex justify-center gap-2">
-                      <button 
-                          onClick={() => updateTimelineMode('vietnam')}
-                          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${timelineMode === 'vietnam' ? 'bg-history-red border-history-red text-white' : 'bg-transparent border-white/30 text-white/70 hover:bg-white/10'}`}
-                      >
-                          Việt Nam
-                      </button>
-                      <button 
-                          onClick={() => updateTimelineMode('both')}
-                          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border flex items-center gap-1 ${timelineMode === 'both' ? 'bg-history-gold border-history-gold text-history-dark' : 'bg-transparent border-white/30 text-white/70 hover:bg-white/10'}`}
-                      >
-                          <Columns size={12}/> Song song
-                      </button>
-                      <button 
-                          onClick={() => updateTimelineMode('world')}
-                          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${timelineMode === 'world' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-transparent border-white/30 text-white/70 hover:bg-white/10'}`}
-                      >
-                          Thế Giới
-                      </button>
+                  <div className="mt-6 flex justify-center">
+                      <div className="inline-flex p-1 bg-black/40 backdrop-blur-md rounded-xl border border-white/30 shadow-2xl relative">
+                          <button 
+                              onClick={() => updateTimelineMode('vietnam')}
+                              className={`relative z-10 px-6 py-2 rounded-lg text-xs font-black transition-colors uppercase tracking-widest ${timelineMode === 'vietnam' ? 'text-white' : 'text-white/70 hover:text-white'}`}
+                          >
+                              {timelineMode === 'vietnam' && (
+                                  <motion.div 
+                                      layoutId="active-pill"
+                                      className="absolute inset-0 bg-history-red rounded-lg shadow-lg -z-10"
+                                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                  />
+                              )}
+                              Việt Nam
+                          </button>
+                          <button 
+                              onClick={() => updateTimelineMode('world')}
+                              className={`relative z-10 px-6 py-2 rounded-lg text-xs font-black transition-colors uppercase tracking-widest ${timelineMode === 'world' ? 'text-white' : 'text-white/70 hover:text-white'}`}
+                          >
+                              {timelineMode === 'world' && (
+                                  <motion.div 
+                                      layoutId="active-pill"
+                                      className="absolute inset-0 bg-blue-600 rounded-lg shadow-lg -z-10"
+                                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                  />
+                              )}
+                              Thế Giới
+                          </button>
+                          <button 
+                              onClick={() => updateTimelineMode('both')}
+                              className={`relative z-10 px-6 py-2 rounded-lg text-xs font-black transition-colors uppercase tracking-widest flex items-center gap-2 ${timelineMode === 'both' ? 'text-history-dark' : 'text-white/70 hover:text-white'}`}
+                          >
+                              {timelineMode === 'both' && (
+                                  <motion.div 
+                                      layoutId="active-pill"
+                                      className="absolute inset-0 bg-history-gold rounded-lg shadow-lg -z-10"
+                                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                  />
+                              )}
+                              <Columns size={14}/> Song song
+                          </button>
+                      </div>
                   </div>
               )}
           </div>
@@ -556,43 +605,96 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ searchTerm, onAskAI, resetK
           <>
             {renderHeader('Khám Phá Lịch Sử')}
             <div className="max-w-6xl mx-auto px-4 py-6 md:py-10 animate-fade-in">
-                <h2 className="text-xl md:text-2xl font-bold text-history-dark mb-6 font-serif">Danh mục khám phá</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-history-dark mb-8 font-serif">Danh mục khám phá</h2>
                 
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
-                {/* Cards for navigation */}
-                <div onClick={() => navigateTo('vn-events', { mode: 'vietnam' })} className="group relative bg-white rounded-2xl md:rounded-3xl shadow-sm border border-gray-200 p-4 md:p-8 cursor-pointer overflow-hidden transition-all hover:shadow-lg hover:border-history-red h-auto flex flex-col justify-between">
-                    <div className="absolute top-0 right-0 p-2 opacity-5 md:opacity-10 group-hover:opacity-20 transition-opacity"><BookOpen size={60} className="text-history-red" /></div>
-                    <div className="bg-red-100 w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center mb-3 md:mb-4 text-history-red"><BookOpen size={20} className="md:w-8 md:h-8" /></div>
-                    <div><h3 className="text-sm md:text-2xl font-bold text-history-red font-serif leading-tight">Sự Kiện<br/>Việt Nam</h3></div>
-                </div>
-
-                <div onClick={() => navigateTo('world-events', { mode: 'world' })} className="group relative bg-white rounded-2xl md:rounded-3xl shadow-sm border border-gray-200 p-4 md:p-8 cursor-pointer overflow-hidden transition-all hover:shadow-lg hover:border-blue-600 h-auto flex flex-col justify-between">
-                    <div className="absolute top-0 right-0 p-2 opacity-5 md:opacity-10 group-hover:opacity-20 transition-opacity"><Globe size={60} className="text-blue-600" /></div>
-                    <div className="bg-blue-100 w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center mb-3 md:mb-4 text-blue-600"><Globe size={20} className="md:w-8 md:h-8" /></div>
-                    <div><h3 className="text-sm md:text-2xl font-bold text-blue-800 font-serif leading-tight">Sự Kiện<br/>Thế Giới</h3></div>
-                </div>
-
-                <div onClick={() => navigateTo('vn-figures')} className="group relative bg-white rounded-2xl md:rounded-3xl shadow-sm border border-gray-200 p-4 md:p-8 cursor-pointer overflow-hidden transition-all hover:shadow-lg hover:border-yellow-600 h-auto flex flex-col justify-between">
-                    <div className="absolute top-0 right-0 p-2 opacity-5 md:opacity-10 group-hover:opacity-20 transition-opacity"><Users size={60} className="text-yellow-600" /></div>
-                    <div className="bg-yellow-100 w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center mb-3 md:mb-4 text-yellow-600"><Star size={20} className="md:w-8 md:h-8" /></div>
-                    <div><h3 className="text-sm md:text-2xl font-bold text-yellow-800 font-serif leading-tight">Nhân Vật<br/>Việt Nam</h3></div>
-                </div>
-
-                <div onClick={() => navigateTo('world-figures')} className="group relative bg-white rounded-2xl md:rounded-3xl shadow-sm border border-gray-200 p-4 md:p-8 cursor-pointer overflow-hidden transition-all hover:shadow-lg hover:border-purple-600 h-auto flex flex-col justify-between">
-                    <div className="absolute top-0 right-0 p-2 opacity-5 md:opacity-10 group-hover:opacity-20 transition-opacity"><Users size={60} className="text-purple-600" /></div>
-                    <div className="bg-purple-100 w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center mb-3 md:mb-4 text-purple-600"><Globe size={20} className="md:w-8 md:h-8" /></div>
-                    <div><h3 className="text-sm md:text-2xl font-bold text-purple-800 font-serif leading-tight">Nhân Vật<br/>Thế Giới</h3></div>
-                </div>
-                </div>
-                
-                <div onClick={() => navigateTo('topics')} className="group relative bg-white rounded-2xl md:rounded-3xl shadow-sm border border-green-600/20 hover:border-green-600 cursor-pointer overflow-hidden transition-all p-4 md:p-8 flex items-center gap-4 md:gap-6">
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-50 to-white z-0 opacity-50"></div>
-                    <div className="relative z-10 bg-green-100 p-3 md:p-4 rounded-full text-green-600 shrink-0"><FolderOpen size={24} className="md:w-10 md:h-10" /></div>
-                    <div className="relative z-10">
-                        <h3 className="text-base md:text-2xl font-bold text-green-800 font-serif">Các Chuyên Đề Lịch Sử 12</h3>
-                        <p className="text-xs md:text-base text-gray-600 mt-1">ASEAN, Kháng chiến, Chiến tranh lạnh, Liên Hợp Quốc...</p>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                    {/* Sự Kiện Việt Nam */}
+                    <div 
+                        onClick={() => navigateTo('vn-events', { mode: 'vietnam' })} 
+                        className="group relative bg-[#f4978e] rounded-[2.5rem] p-6 md:p-8 cursor-pointer transition-all hover:shadow-2xl hover:-translate-y-2 h-48 md:h-64 overflow-hidden flex flex-col justify-between shadow-lg shadow-rose-200/50"
+                    >
+                        <div className="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white">
+                            <BookOpen size={28} className="md:w-8 md:h-8" />
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-lg md:text-2xl font-black text-white leading-tight">Sự Kiện<br/>Việt Nam</h3>
+                            <p className="text-white/80 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-1">Lịch sử nước nhà</p>
+                        </div>
+                        <div className="absolute -bottom-6 -right-6 opacity-10 text-white transform rotate-12 group-hover:scale-110 transition-transform duration-700">
+                            <BookOpen size={160} />
+                        </div>
                     </div>
-                    <div className="ml-auto text-green-600 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"><ArrowLeft className="rotate-180" /></div>
+
+                    {/* Sự Kiện Thế Giới */}
+                    <div 
+                        onClick={() => navigateTo('world-events', { mode: 'world' })} 
+                        className="group relative bg-[#84a59d] rounded-[2.5rem] p-6 md:p-8 cursor-pointer transition-all hover:shadow-2xl hover:-translate-y-2 h-48 md:h-64 overflow-hidden flex flex-col justify-between shadow-lg shadow-teal-200/50"
+                    >
+                        <div className="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white">
+                            <Globe size={28} className="md:w-8 md:h-8" />
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-lg md:text-2xl font-black text-white leading-tight">Sự Kiện<br/>Thế Giới</h3>
+                            <p className="text-white/80 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-1">Toàn cảnh nhân loại</p>
+                        </div>
+                        <div className="absolute -bottom-6 -right-6 opacity-10 text-white transform -rotate-12 group-hover:scale-110 transition-transform duration-700">
+                            <Globe size={160} />
+                        </div>
+                    </div>
+
+                    {/* Nhân Vật Việt Nam */}
+                    <div 
+                        onClick={() => navigateTo('vn-figures')} 
+                        className="group relative bg-[#fbc4ab] rounded-[2.5rem] p-6 md:p-8 cursor-pointer transition-all hover:shadow-2xl hover:-translate-y-2 h-48 md:h-64 overflow-hidden flex flex-col justify-between shadow-lg shadow-orange-200/50"
+                    >
+                        <div className="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white">
+                            <Users size={28} className="md:w-8 md:h-8" />
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-lg md:text-2xl font-black text-white leading-tight">Nhân Vật<br/>Việt Nam</h3>
+                            <p className="text-white/80 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-1">Anh hùng hào kiệt</p>
+                        </div>
+                        <div className="absolute -bottom-6 -right-6 opacity-10 text-white transform rotate-45 group-hover:scale-110 transition-transform duration-700">
+                            <Star size={160} className="fill-current" />
+                        </div>
+                    </div>
+
+                    {/* Nhân Vật Thế Giới */}
+                    <div 
+                        onClick={() => navigateTo('world-figures')} 
+                        className="group relative bg-[#f2cc8f] rounded-[2.5rem] p-6 md:p-8 cursor-pointer transition-all hover:shadow-2xl hover:-translate-y-2 h-48 md:h-64 overflow-hidden flex flex-col justify-between shadow-lg shadow-yellow-200/50"
+                    >
+                        <div className="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white">
+                            <GraduationCap size={28} className="md:w-8 md:h-8" />
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-lg md:text-2xl font-black text-white leading-tight">Nhân Vật<br/>Thế Giới</h3>
+                            <p className="text-white/80 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-1">Vĩ nhân thời đại</p>
+                        </div>
+                        <div className="absolute -bottom-6 -right-6 opacity-10 text-white transform -rotate-12 group-hover:scale-110 transition-transform duration-700">
+                            <GraduationCap size={160} />
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Chuyên đề Section */}
+                <div 
+                    onClick={() => navigateTo('topics')} 
+                    className="group relative bg-[#ece4db] rounded-[2.5rem] p-6 md:p-8 cursor-pointer transition-all hover:shadow-2xl hover:-translate-y-1 overflow-hidden flex items-center gap-6 shadow-lg shadow-stone-200/50"
+                >
+                    <div className="w-12 h-12 md:w-16 md:h-16 bg-white/30 backdrop-blur-md rounded-2xl flex items-center justify-center text-stone-700 shrink-0">
+                        <FolderOpen size={32} className="md:w-10 md:h-10" />
+                    </div>
+                    <div className="flex-1 relative z-10">
+                        <h3 className="text-lg md:text-3xl font-black text-stone-800 leading-tight">Các Chuyên Đề Lịch Sử 12</h3>
+                        <p className="text-stone-600/80 text-xs md:text-base font-bold mt-1">ASEAN, Kháng chiến, Chiến tranh lạnh, Liên Hợp Quốc...</p>
+                    </div>
+                    <div className="absolute -right-10 -bottom-10 opacity-5 text-stone-900 transform -rotate-12 group-hover:scale-110 transition-transform duration-700">
+                        <FolderOpen size={240} />
+                    </div>
+                    <div className="text-stone-700 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 hidden md:block relative z-10">
+                        <ArrowLeft className="rotate-180" size={32} />
+                    </div>
                 </div>
             </div>
           </>
@@ -662,41 +764,41 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ searchTerm, onAskAI, resetK
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     {/* Cột Chuyên đề Việt Nam */}
                     <div className="space-y-4">
-                        <h3 className="text-lg md:text-xl font-bold text-history-red border-b-2 border-history-red pb-2 mb-4 flex items-center gap-2"><Flag size={20} /> Chuyên đề Việt Nam</h3>
-                        <div onClick={() => handleTopicClick('vn-asean')} className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-300 cursor-pointer transition-all flex items-center gap-4">
-                            <div className="bg-blue-100 p-2 md:p-3 rounded-full text-blue-600 shrink-0"><Globe size={20} className="md:w-6 md:h-6" /></div>
-                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Việt Nam - ASEAN</h4><p className="text-xs text-gray-500">Quá trình gia nhập và đóng góp của VN</p></div>
+                        <h3 className="text-lg md:text-xl font-bold text-[#f4978e] border-b-2 border-[#f4978e] pb-2 mb-4 flex items-center gap-2"><Flag size={20} /> Chuyên đề Việt Nam</h3>
+                        <div onClick={() => handleTopicClick('vn-asean')} className="bg-[#fbc4ab]/20 p-4 md:p-5 rounded-2xl shadow-sm border border-[#fbc4ab]/30 hover:shadow-md hover:bg-[#fbc4ab]/40 cursor-pointer transition-all flex items-center gap-4">
+                            <div className="bg-[#fbc4ab] p-2 md:p-3 rounded-xl text-white shrink-0 shadow-sm"><Globe size={20} className="md:w-6 md:h-6" /></div>
+                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Việt Nam - ASEAN</h4><p className="text-xs text-gray-600">Quá trình gia nhập và đóng góp của VN</p></div>
                         </div>
-                        <div onClick={() => handleTopicClick('phap')} className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-red-300 cursor-pointer transition-all flex items-center gap-4">
-                            <div className="bg-red-100 p-2 md:p-3 rounded-full text-red-600 shrink-0"><Target size={20} className="md:w-6 md:h-6" /></div>
-                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Kháng Chiến Chống Pháp</h4><p className="text-xs text-gray-500">Giai đoạn 1945 - 1954</p></div>
+                        <div onClick={() => handleTopicClick('phap')} className="bg-[#f4978e]/20 p-4 md:p-5 rounded-2xl shadow-sm border border-[#f4978e]/30 hover:shadow-md hover:bg-[#f4978e]/40 cursor-pointer transition-all flex items-center gap-4">
+                            <div className="bg-[#f4978e] p-2 md:p-3 rounded-xl text-white shrink-0 shadow-sm"><Target size={20} className="md:w-6 md:h-6" /></div>
+                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Kháng Chiến Chống Pháp</h4><p className="text-xs text-gray-600">Giai đoạn 1945 - 1954</p></div>
                         </div>
-                        <div onClick={() => handleTopicClick('my')} className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-300 cursor-pointer transition-all flex items-center gap-4">
-                            <div className="bg-orange-100 p-2 md:p-3 rounded-full text-orange-600 shrink-0"><Target size={20} className="md:w-6 md:h-6" /></div>
-                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Kháng Chiến Chống Mỹ</h4><p className="text-xs text-gray-500">Giai đoạn 1954 - 1975</p></div>
+                        <div onClick={() => handleTopicClick('my')} className="bg-[#f4978e]/20 p-4 md:p-5 rounded-2xl shadow-sm border border-[#f4978e]/30 hover:shadow-md hover:bg-[#f4978e]/40 cursor-pointer transition-all flex items-center gap-4">
+                            <div className="bg-[#f4978e] p-2 md:p-3 rounded-xl text-white shrink-0 shadow-sm"><Target size={20} className="md:w-6 md:h-6" /></div>
+                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Kháng Chiến Chống Mỹ</h4><p className="text-xs text-gray-600">Giai đoạn 1954 - 1975</p></div>
                         </div>
                     </div>
 
                     {/* Cột Chuyên đề Thế giới */}
                     <div className="space-y-4">
-                        <h3 className="text-lg md:text-xl font-bold text-blue-700 border-b-2 border-blue-700 pb-2 mb-4 flex items-center gap-2"><Globe size={20} /> Chuyên đề Thế giới</h3>
-                        <div onClick={() => handleTopicClick('ianta')} className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-300 cursor-pointer transition-all flex items-center gap-4">
-                            <div className="bg-purple-100 p-2 md:p-3 rounded-full text-purple-600 shrink-0"><Anchor size={20} className="md:w-6 md:h-6" /></div>
-                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Trật tự 2 cực I-an-ta</h4><p className="text-xs text-gray-500">Sự hình thành trật tự thế giới mới sau CTTG 2</p></div>
+                        <h3 className="text-lg md:text-xl font-bold text-[#84a59d] border-b-2 border-[#84a59d] pb-2 mb-4 flex items-center gap-2"><Globe size={20} /> Chuyên đề Thế giới</h3>
+                        <div onClick={() => handleTopicClick('ianta')} className="bg-[#f2cc8f]/20 p-4 md:p-5 rounded-2xl shadow-sm border border-[#f2cc8f]/30 hover:shadow-md hover:bg-[#f2cc8f]/40 cursor-pointer transition-all flex items-center gap-4">
+                            <div className="bg-[#f2cc8f] p-2 md:p-3 rounded-xl text-white shrink-0 shadow-sm"><Anchor size={20} className="md:w-6 md:h-6" /></div>
+                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Trật tự 2 cực I-an-ta</h4><p className="text-xs text-gray-600">Sự hình thành trật tự thế giới mới sau CTTG 2</p></div>
                         </div>
-                        <div onClick={() => handleTopicClick('coldwar')} className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-400 cursor-pointer transition-all flex items-center gap-4">
-                            <div className="bg-gray-200 p-2 md:p-3 rounded-full text-gray-600 shrink-0"><Layout size={20} className="md:w-6 md:h-6" /></div>
-                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Chiến Tranh Lạnh</h4><p className="text-xs text-gray-500">Cuộc đối đầu Xô - Mỹ (1947 - 1989)</p></div>
+                        <div onClick={() => handleTopicClick('coldwar')} className="bg-[#84a59d]/20 p-4 md:p-5 rounded-2xl shadow-sm border border-[#84a59d]/30 hover:shadow-md hover:bg-[#84a59d]/40 cursor-pointer transition-all flex items-center gap-4">
+                            <div className="bg-[#84a59d] p-2 md:p-3 rounded-xl text-white shrink-0 shadow-sm"><Layout size={20} className="md:w-6 md:h-6" /></div>
+                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Chiến Tranh Lạnh</h4><p className="text-xs text-gray-600">Cuộc đối đầu Xô - Mỹ (1947 - 1989)</p></div>
                         </div>
-                        <div onClick={() => handleTopicClick('un')} className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-400 cursor-pointer transition-all flex items-center gap-4">
-                            <div className="bg-blue-50 p-2 md:p-3 rounded-full text-blue-500 shrink-0"><Globe size={20} className="md:w-6 md:h-6" /></div>
-                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Liên Hợp Quốc</h4><p className="text-xs text-gray-500">Tổ chức quốc tế lớn nhất hành tinh</p></div>
+                        <div onClick={() => handleTopicClick('un')} className="bg-[#84a59d]/20 p-4 md:p-5 rounded-2xl shadow-sm border border-[#84a59d]/30 hover:shadow-md hover:bg-[#84a59d]/40 cursor-pointer transition-all flex items-center gap-4">
+                            <div className="bg-[#84a59d] p-2 md:p-3 rounded-xl text-white shrink-0 shadow-sm"><Globe size={20} className="md:w-6 md:h-6" /></div>
+                            <div><h4 className="font-bold text-gray-800 text-sm md:text-base">Liên Hợp Quốc</h4><p className="text-xs text-gray-600">Tổ chức quốc tế lớn nhất hành tinh</p></div>
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-12 bg-history-paper p-6 md:p-8 rounded-3xl border border-history-gold/30">
-                    <h3 className="text-xl font-bold font-serif text-history-dark mb-4 flex items-center gap-2"><Search size={24} /> Tra cứu nhanh chủ đề khác</h3>
+                <div className="mt-12 bg-[#ece4db]/30 p-6 md:p-8 rounded-3xl border border-[#ece4db]">
+                    <h3 className="text-xl font-bold font-serif text-stone-800 mb-4 flex items-center gap-2"><Search size={24} /> Tra cứu nhanh chủ đề khác</h3>
                     <div className="flex flex-col md:flex-row gap-4">
                         <input 
                             type="text" 

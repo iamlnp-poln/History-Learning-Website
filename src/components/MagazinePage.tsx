@@ -139,7 +139,7 @@ const MagazinePage: React.FC = () => {
 
                     <div className="inline-block border-2 border-[#8a1c1c] rounded-full p-1">
                         <div className="bg-[#8a1c1c] text-[#fdfbf7] px-8 py-3 rounded-full font-bold uppercase tracking-wider text-sm md:text-base cursor-default">
-                            Hội Văn Hóa Trẻ Việt Nam
+                            The Black Swans
                         </div>
                     </div>
                 </div>
@@ -291,7 +291,7 @@ const MagazinePage: React.FC = () => {
                             <Star className="w-10 h-10 text-[#d4af37] fill-current" />
                         </div>
                         <h2 className="text-3xl md:text-4xl font-bold font-serif mb-2">Tòa Soạn TINH HOA</h2>
-                        <p className="text-[#d4af37] tracking-widest uppercase text-sm">Hội Văn Hóa Trẻ Việt Nam</p>
+                        <p className="text-[#d4af37] tracking-widest uppercase text-sm">The Black Swans</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left max-w-2xl mx-auto">
@@ -313,7 +313,7 @@ const MagazinePage: React.FC = () => {
                                 <h3 className="font-bold text-[#d4af37] uppercase text-sm tracking-wider">Đội ngũ thực hiện</h3>
                             </div>
                             <div>
-                                <p className="font-bold text-lg">Nhóm Tường Thành Vững Chắc</p>
+                                <p className="font-bold text-lg">The Black Swans</p>
                                 <p className="text-sm opacity-70">Biên tập & Thiết kế</p>
                             </div>
                             <div>
@@ -324,7 +324,7 @@ const MagazinePage: React.FC = () => {
                     </div>
 
                     <div className="mt-16 pt-8 border-t border-[#fdfbf7]/10 text-xs opacity-50">
-                        <p>© 2024 Dự án Lịch Sử All-In-One & Tạp chí Tinh Hoa.</p>
+                        <p>© 2024 Dự án Trạm Lịch Sử 4.0 & Tạp chí Tinh Hoa.</p>
                         <p>Bản quyền nội dung thuộc về nhóm tác giả. Vui lòng không sao chép dưới mọi hình thức.</p>
                     </div>
                 </div>

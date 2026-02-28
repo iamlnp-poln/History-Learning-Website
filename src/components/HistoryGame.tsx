@@ -284,7 +284,7 @@ export const HistoryGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              </div>
          </div>
       </main>
-      <footer className="w-full text-center py-4 bg-[#3e2723] text-[#d7ccc8] text-sm shrink-0 border-t border-[#ffb300]/30"><p>© 2025 - Lịch Sử All-In-One"</p></footer>
+      <footer className="w-full text-center py-4 bg-[#3e2723] text-[#d7ccc8] text-sm shrink-0 border-t border-[#ffb300]/30"><p>© 2025 - Trạm Lịch Sử 4.0</p></footer>
       {activeLevel && <GameScreen level={activeLevel} onClose={() => setActiveLevel(null)} onComplete={handleLevelComplete}/>}
       
       <ConfirmationModal 

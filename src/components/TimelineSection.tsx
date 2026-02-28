@@ -257,22 +257,22 @@ const TimelineSection: React.FC<TimelineSectionProps> = ({
               const isSummaryExpanded = expandedSummaries[stage.id];
 
               return (
-                  <div key={stage.id} className="group relative animate-slide-up">
+                  <div key={stage.id} id={stage.id} className="group relative animate-slide-up">
                       {/* Stage Header */}
-                      <div className="sticky top-[64px] z-40 bg-history-paper/95 backdrop-blur-md flex items-center justify-between mb-8 py-3 px-4 border border-history-gold/30 shadow-md transition-all rounded-2xl mx-1 md:mx-0">
-                          <div className="flex items-center gap-3">
+                      <div className="sticky top-[64px] z-40 bg-white flex items-center justify-between mb-8 py-4 px-6 border border-gray-200 shadow-sm transition-all rounded-xl mx-1 md:mx-0">
+                          <div className="flex items-center gap-4">
                               {onBack && (
-                                  <button onClick={onBack} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:text-history-red hover:bg-red-50 transition-colors ml-1 border border-gray-100 bg-white/50" title="Quay lại">
+                                  <button onClick={onBack} className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-history-red hover:bg-red-50 transition-colors" title="Quay lại">
                                       <ArrowLeft size={20} />
                                   </button>
                               )}
-                              <div className="bg-history-red text-white p-2 rounded-xl shadow-md shrink-0 flex items-center justify-center"><Calendar size={20} /></div>
+                              <div className="bg-[#a34a3e] text-white p-2 rounded-lg shadow-sm shrink-0 flex items-center justify-center"><Calendar size={20} /></div>
                               <div>
-                                  <span className="text-history-red font-black text-xl md:text-2xl font-serif tracking-tight block leading-none">
+                                  <span className="text-[#a34a3e] font-bold text-xl md:text-2xl font-serif tracking-tight block leading-none">
                                       {stage.period}
                                   </span>
-                                  <div className="block mt-0.5">
-                                      <h2 className="text-sm md:text-base font-medium text-gray-500 font-serif leading-tight line-clamp-1">{stage.title}</h2>
+                                  <div className="block mt-1">
+                                      <h2 className="text-sm md:text-base font-medium text-gray-400 font-serif leading-tight line-clamp-1">{stage.title}</h2>
                                   </div>
                               </div>
                           </div>

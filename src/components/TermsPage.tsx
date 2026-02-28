@@ -27,7 +27,7 @@ const TermsPage: React.FC = () => {
                 <EditableText id="terms-hero-title" defaultText="Điều Khoản & Chính Sách" />
             </h1>
             <p className="text-gray-300 mt-2 max-w-2xl mx-auto">
-                <EditableText id="terms-hero-desc" defaultText="Quy định sử dụng cho phiên bản thử nghiệm của dự án Tường Thành Vững Chắc." />
+                <EditableText id="terms-hero-desc" defaultText="Quy định sử dụng cho phiên bản thử nghiệm của dự án Trạm Lịch Sử 4.0." />
             </p>
         </div>
       </div>
@@ -44,7 +44,7 @@ const TermsPage: React.FC = () => {
                 id="terms-s1-content"
                 multiline
                 defaultText={`
-                Chào mừng bạn đến với Tường Thành Vững Chắc. Đây là dự án ý tưởng khởi nghiệp (Startup Idea) đang trong giai đoạn chạy thử nghiệm (Pilot Run), được xây dựng bởi nhóm học sinh Trường THPT Nguyễn Công Trứ.
+                Chào mừng bạn đến với Trạm Lịch Sử 4.0. Đây là dự án giải pháp ứng dụng công nghệ và AI đang trong giai đoạn chạy thử nghiệm (Pilot Run), được xây dựng bởi nhóm The Black Swans.
 
                 Hiện tại, dự án đang được vận hành trên các hạ tầng công nghệ miễn phí và giới hạn nhằm mục đích nghiên cứu, kiểm thử mô hình và chứng minh tính khả thi. Bằng việc truy cập website, bạn hiểu và đồng ý rằng dịch vụ này đang ở trạng thái Beta và có thể chưa hoàn thiện.
                 `}
@@ -66,7 +66,7 @@ const TermsPage: React.FC = () => {
                 defaultText={`
                 - Nội dung kiến thức: Các dữ liệu lịch sử, niên biểu và câu hỏi trắc nghiệm được biên soạn dựa trên Sách Giáo Khoa Lịch Sử (Bộ Giáo dục & Đào tạo Việt Nam) và các nguồn tài liệu chính thống. Chúng tôi không tuyên bố sở hữu bản quyền đối với các dữ kiện lịch sử gốc.
                 
-                - Mã nguồn & Giao diện: Thuộc quyền sở hữu của đội ngũ phát triển Tường Thành Vững Chắc Team. Nghiêm cấm sao chép, kinh doanh mã nguồn trái phép.
+                - Mã nguồn & Giao diện: Thuộc quyền sở hữu của đội ngũ phát triển The Black Swans. Nghiêm cấm sao chép, kinh doanh mã nguồn trái phép.
                 
                 - Tư liệu hình ảnh/Video: Một số hình ảnh minh họa được sưu tầm từ nguồn Internet nhằm mục đích giáo dục phi lợi nhuận. Nếu có vấn đề về bản quyền tác giả, vui lòng liên hệ để chúng tôi gỡ bỏ hoặc ghi nguồn bổ sung.
                 `}

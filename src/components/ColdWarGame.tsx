@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Lock, Check, Star, X, RotateCcw, Award, ChevronRight, Globe, Radio, ShieldAlert, Rocket, Eye } from 'lucide-react';
-import { COLD_WAR_DATA } from '../../data/data';
+import { COLD_WAR_DATA } from '../data/gameData';
 
 const LevelNode = ({ level, status, onClick, position }: any) => {
   const isLocked = status === 'locked';

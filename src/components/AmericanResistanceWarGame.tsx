@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Lock, Check, Star, X, RotateCcw, Award, ChevronRight, Flag, Target, MapPin, Zap } from 'lucide-react';
-import { RESISTANCE_WAR_DATA } from '../../data/data';
+import { RESISTANCE_WAR_DATA } from '../data/gameData';
 
 const LevelNode = ({ level, status, onClick, position }: any) => {
   const isLocked = status === 'locked';
@@ -291,7 +291,7 @@ export const AmericanResistanceWarGame: React.FC<{ onBack: () => void }> = ({ on
              </div>
          </div>
       </main>
-      <footer className="w-full text-center py-4 bg-[#2e2e2e] text-[#9e9e9e] text-sm shrink-0 border-t border-[#424242]"><p>© 2025 Lịch Sử All-In-One</p></footer>
+      <footer className="w-full text-center py-4 bg-[#2e2e2e] text-[#9e9e9e] text-sm shrink-0 border-t border-[#424242]"><p>© 2025 Trạm Lịch Sử 4.0</p></footer>
       {activeLevel && <GameScreen level={activeLevel} onClose={() => setActiveLevel(null)} onComplete={handleLevelComplete}/>}
     </div>
   );
